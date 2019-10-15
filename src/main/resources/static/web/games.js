@@ -1,3 +1,6 @@
+//THIS IS GAMES, THE JSON STUFF, NOT GAME
+
+
 $(function() {
 
      // display text in the output area

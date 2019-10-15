@@ -73,6 +73,7 @@ public class SalvoController {
     }
 
     @RequestMapping("api/game_view/{nn}")
+    @ResponseBody
     public GamePlayer findGP(@PathVariable Long nn) {
 
         Optional<GamePlayer> gp = gprepo.findById(nn);
