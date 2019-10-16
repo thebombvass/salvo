@@ -1,5 +1,6 @@
 package com.codeoftheweb.salvo;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -7,14 +8,13 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-public class Ship {
+public class Salvo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name="native", strategy = "native")
-    private long ship_id;
-    private String shipType;
-
+    private long salvo_id;
+    private int turn_number;
 
     @ElementCollection
     private List<String> locations;
@@ -23,21 +23,25 @@ public class Ship {
     @JoinColumn(name="gamePlayer")
     private GamePlayer gamePlayer;
 
-    public Ship() {}
+    public Salvo() {}
 
-    public Ship(String shipType, GamePlayer gamePlayer, List<String> locations) {
-        this.shipType = shipType;
+    public Salvo(int turn_number, GamePlayer gamePlayer, List<String> locations) {
+        this.turn_number = turn_number;
         this.gamePlayer = gamePlayer;
         this.locations = locations;
     }
 
     //Getters
-    public long getShip_id() {
-        return ship_id;
+    public long getSalvo_id() {
+        return salvo_id;
     }
 
-    public String getShipType() {
-        return shipType;
+    public int getTurn_number() {
+        return turn_number;
+    }
+
+    public List<String> getLocations() {
+        return locations;
     }
 
     @JsonIgnore
@@ -45,34 +49,30 @@ public class Ship {
         return gamePlayer;
     }
 
-    public List<String> getLocations() {
-        return locations;
-    }
-
     //Setters
-    public void setShip_id(long ship_id) {
-        this.ship_id = ship_id;
+    public void setSalvo_id(long salvo_id) {
+        this.salvo_id = salvo_id;
     }
 
-    public void setShipType(String shipType) {
-        this.shipType = shipType;
-    }
-
-    public void setGamePlayer(GamePlayer gamePlayer) {
-        this.gamePlayer = gamePlayer;
+    public void setTurn_number(int turn_number) {
+        this.turn_number = turn_number;
     }
 
     public void setLocations(List<String> locations) {
         this.locations = locations;
     }
 
+    public void setGamePlayer(GamePlayer gamePlayer) {
+        this.gamePlayer = gamePlayer;
+    }
+
     //toString
 
     @Override
     public String toString() {
-        return "Ship{" +
-                "ship_id=" + ship_id +
-                ", shipType='" + shipType + '\'' +
+        return "Salvo{" +
+                "salvo_id=" + salvo_id +
+                ", turn_number=" + turn_number +
                 ", locations=" + locations +
                 ", gamePlayer=" + gamePlayer +
                 '}';

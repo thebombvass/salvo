@@ -51,16 +51,17 @@ public class SalvoController {
         dto.put("game_id", gamePlayer.getGame().getGame_id());
         dto.put("player_id", gamePlayer.getPlayer().getPlayer_id());
         dto.put("ships", gamePlayer.getShips());
+        dto.put("salvoes", gamePlayer.getSalvos());
         return dto;
     }
 
 
     @Autowired
-    public ShipRepository srepo;
+    public ShipRepository shrepo;
 
     @RequestMapping("/api/ships")
     public List<Map<String, Object>> getShips() {
-        return srepo.findAll().stream().map(ship -> makeShipsDTO(ship)).collect(Collectors.toList());
+        return shrepo.findAll().stream().map(ship -> makeShipsDTO(ship)).collect(Collectors.toList());
     }
 
     private Map<String, Object> makeShipsDTO(Ship ship) {
@@ -79,6 +80,23 @@ public class SalvoController {
         Optional<GamePlayer> gp = gprepo.findById(nn);
         GamePlayer gp1 = gp.orElse(new GamePlayer());
         return gp1;
+    }
+
+    @Autowired
+    public SalvoRespository sarepo;
+
+    @RequestMapping("/api/salvoes")
+    public List <Map<String, Object>> getSalvoes() {
+        return sarepo.findAll().stream().map(salvo -> makeSalvoesDTO(salvo)).collect(Collectors.toList());
+    }
+
+    private Map<String, Object> makeSalvoesDTO(Salvo salvo) {
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", salvo.getSalvo_id());
+        dto.put("turnNumber", salvo.getTurn_number());
+        dto.put("gamePlayer", salvo.getGamePlayer().getGameplayer_id());
+        dto.put("locations", salvo.getLocations());
+        return dto;
     }
 
 }

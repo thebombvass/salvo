@@ -17,6 +17,7 @@ public class SalvoApplication {
 		SpringApplication.run(SalvoApplication.class, args);
 	}
 
+	// ***** creating all the objects for test data *****//
 	//creating dates in the right format
 	Date date = new Date();
 	Date date2 = Date.from(date.toInstant().plusSeconds(3600));
@@ -72,8 +73,18 @@ public class SalvoApplication {
 	Ship ship15 = new Ship("destroyer", gamePlayer4, destroyerlocs);
 	Ship ship16 = new Ship("aircraftcarrier", gamePlayer4, aircraftcarrierlocs);
 
+	//creating salvo locations (they're all gonna have the same board to start)
+	List<String> salvolocs = Arrays.asList("A1", "D4", "H4", "H8", "B9");
+
+	//creating salvos for GP1-4
+	Salvo salvo1 = new Salvo(1, gamePlayer1, salvolocs);
+	Salvo salvo2 = new Salvo(1, gamePlayer2, salvolocs);
+	Salvo salvo3 = new Salvo(1, gamePlayer3, salvolocs);
+	Salvo salvo4 = new Salvo(1, gamePlayer4, salvolocs);
+
+	// ***** adding test objects/data to the repos *****//
 	@Bean
-	public CommandLineRunner initData(GameRespository gameRepository, PlayerRepository playerRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository) {
+	public CommandLineRunner initData(GameRespository gameRepository, PlayerRepository playerRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRespository salvoRespository) {
 		return (args) -> {
 			gameRepository.save(game1);
 			gameRepository.save(game2);
@@ -103,6 +114,11 @@ public class SalvoApplication {
 			shipRepository.save(ship14);
 			shipRepository.save(ship15);
 			shipRepository.save(ship16);
+
+			salvoRespository.save(salvo1);
+			salvoRespository.save(salvo2);
+			salvoRespository.save(salvo3);
+			salvoRespository.save(salvo4);
 		};
 	}
 
