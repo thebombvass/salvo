@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @RestController
 public class SalvoController {
 
+    //GAME
     @Autowired
     public GameRespository grepo;
 
@@ -28,6 +29,7 @@ public class SalvoController {
         return dto;
     }
 
+    //PLAYER
     @Autowired
     public PlayerRepository prepo;
 
@@ -36,6 +38,7 @@ public class SalvoController {
         return prepo.findAll();
     }
 
+    //GAMEPLAYER
     @Autowired
     public GamePlayerRepository gprepo;
 
@@ -51,11 +54,11 @@ public class SalvoController {
         dto.put("game_id", gamePlayer.getGame().getGame_id());
         dto.put("player_id", gamePlayer.getPlayer().getPlayer_id());
         dto.put("ships", gamePlayer.getShips());
-        dto.put("salvoes", gamePlayer.getSalvos());
+        dto.put("salvoes", gamePlayer.getSalvoes());
         return dto;
     }
 
-
+    //SHIP
     @Autowired
     public ShipRepository shrepo;
 
@@ -73,15 +76,7 @@ public class SalvoController {
         return dto;
     }
 
-    @RequestMapping("api/game_view/{nn}")
-    @ResponseBody
-    public GamePlayer findGP(@PathVariable Long nn) {
-
-        Optional<GamePlayer> gp = gprepo.findById(nn);
-        GamePlayer gp1 = gp.orElse(new GamePlayer());
-        return gp1;
-    }
-
+    //SALVO
     @Autowired
     public SalvoRespository sarepo;
 
@@ -99,4 +94,14 @@ public class SalvoController {
         return dto;
     }
 
+
+    //GAME VIEW
+    @RequestMapping("api/game_view/{nn}")
+    @ResponseBody
+    public Game findGP(@PathVariable Long nn) {
+
+        Optional<Game> game_view = grepo.findById(nn);
+        Game game_view1 = game_view.orElse(new Game());
+        return game_view1;
+    }
 }

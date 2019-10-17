@@ -28,7 +28,7 @@ public class GamePlayer {
     Set<Ship> ships;
 
     @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
-    Set<Salvo> salvos;
+    Set<Salvo> salvoes;
 
     //constructor
     public GamePlayer() {}
@@ -61,8 +61,8 @@ public class GamePlayer {
         return ships;
     }
 
-    public Set<Salvo> getSalvos() {
-        return salvos;
+    public Set<Salvo> getSalvoes() {
+        return salvoes;
     }
 
     //Setters
@@ -82,8 +82,8 @@ public class GamePlayer {
         this.ships = ships;
     }
 
-    public void setSalvos(Set<Salvo> salvos) {
-        this.salvos = salvos;
+    public void setSalvoes(Set<Salvo> salvoes) {
+        this.salvoes = salvoes;
     }
 
     @Override
@@ -94,6 +94,7 @@ public class GamePlayer {
                 ", player=" + player +
                 ", game=" + game +
                 ", ships=" + ships +
+                ", salvoes=" + salvoes +
                 '}';
     }
 }
