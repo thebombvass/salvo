@@ -33,11 +33,25 @@ $(function() {
     //adds a red 'B' for 'bomb' to specific cells on the players board based on int inputs for row and column
     //used later on in setUpGrid
     function createSalvo(row, col, board) {
-            //TO DO: add parsing for a->1 b->2 etc.
+            let guy;
             if (board == 1) {
-                $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).text('B');
-            } if (board == 2) {
-                $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).text('B');
+                guy = $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col)[0]
+            } else if (board == 2) {
+                guy = $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col)[0]
+            }
+
+            if(guy.hasAttribute('class')) {
+                if (board == 1) {
+                    $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+                } if (board == 2) {
+                    $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+                }
+            } else {
+                if (board == 1) {
+                    $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
+                } if (board == 2) {
+                    $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
+                }
             }
         }
 
@@ -53,7 +67,6 @@ $(function() {
     //'board'-int- to determine if these will be set up on your board or your opponents board
     //called inside the ajax call so create the entire 2 boards with ships and slavoes
     function setUpGrid(array, shipSalvo, board) {
-        console.log('here')
         console.log(shipSalvo)
         let initialLocations = []
         for (let i=0; i < array.length; i++) {
@@ -72,7 +85,6 @@ $(function() {
             } else if (shipSalvo == "salvo") {
                 createSalvo(param1, param2, board)
             } else {
-            console.log("no")
             }
         }
     }
@@ -90,6 +102,20 @@ $(function() {
             url: `http://${pageContext}/api/game_view/${pageQuery}`,
             success: function(data) {
                 //dynamically add data relevant to this game
+
+                //NOTE TO SELF *******!!!!!!!!!!!*********
+                // fix this
+                // so the boards keep getting switched weirdly. I think that ajax returns the data in a different order
+                // sometimes and you are using [0] and [1] to get the players.
+                // Add a conditional that checks that blahblah[0].username == player1 ( as defined previously)
+                // Might need to add the same conditional for salvoes.
+                //
+                // hmmm on second thought this might not be right becasue player 1 and 2 are also defined using [0] or [1]
+                // something weird is happening with the bombs being in bizzare places and the conditional that checks for which
+                // type of bomb (i.e. hit/miss)
+                // ****************!!!!!!!!!!!*****************
+
+
                 console.log(data)
                 let date = data.date.toString()
                 let player1 = data.gamePlayers[0].player.username
@@ -109,8 +135,8 @@ $(function() {
                 let salvoesPlayer2 = data.gamePlayers[1].salvoes
                 console.log(salvoesPlayer2)
                 //note - salvoes from one player show up on the board of the other player
-                setUpGrid(salvoesPlayer1, "salvo", 2); //1 - 2
-                setUpGrid(salvoesPlayer2, "salvo", 1); //2 - 1
+                setTimeout(setUpGrid(salvoesPlayer1, "salvo", 2), 1000); //1 - 2
+                setTimeout(setUpGrid(salvoesPlayer2, "salvo", 1), 1000); //2 - 1
             }
         });
 

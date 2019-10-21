@@ -21,6 +21,9 @@ public class Player {
     @OneToMany(mappedBy = "player", fetch= FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
+//    @OneToMany(mappedBy = "player", fetch= FetchType.EAGER)
+//    Set<Score> scores;
+
     @JsonIgnore
     public List<Game> getGames() {
         return gamePlayers.stream().map(sub -> sub.getGame()).collect(Collectors.toList());
@@ -37,6 +40,7 @@ public class Player {
         this.username = username;
     }
 
+    //Getters
     public long getPlayer_id() {
         return player_id;
     }
@@ -45,13 +49,32 @@ public class Player {
         return username;
     }
 
+    @JsonIgnore
+    public Set<GamePlayer> getGamePlayers() {
+        return gamePlayers;
+    }
+
+    //Setters
+    public void setPlayer_id(long player_id) {
+        this.player_id = player_id;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
 
+    public void setGamePlayers(Set<GamePlayer> gamePlayers) {
+        this.gamePlayers = gamePlayers;
+    }
+
+    //toString
     @Override
     public String toString() {
-        return username;
+        return "Player{" +
+                "player_id=" + player_id +
+                ", username='" + username + '\'' +
+                ", gamePlayers=" + gamePlayers +
+                '}';
     }
 }
 

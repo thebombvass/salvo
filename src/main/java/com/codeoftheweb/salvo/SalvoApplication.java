@@ -88,9 +88,16 @@ public class SalvoApplication {
 	Salvo salvo3 = new Salvo(1, gamePlayer2, salvolocs);
 	Salvo salvo4 = new Salvo(1, gamePlayer1, salvolocs1);
 
+
+	//creating scores for games
+	Score score1 = new Score(1.0, gamePlayer1);
+	Score score2 = new Score(0.0, gamePlayer2);
+	Score score3 = new Score(0.5, gamePlayer3);
+	Score score4 = new Score(0.5, gamePlayer4);
+
 	// ***** adding test objects/data to the repos *****//
 	@Bean
-	public CommandLineRunner initData(GameRespository gameRepository, PlayerRepository playerRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRespository salvoRespository) {
+	public CommandLineRunner initData(GameRespository gameRepository, PlayerRepository playerRepository, GamePlayerRepository gamePlayerRepository, ShipRepository shipRepository, SalvoRespository salvoRespository, ScoreRepository scoreRepository) {
 		return (args) -> {
 			gameRepository.save(game1);
 			gameRepository.save(game2);
@@ -125,6 +132,11 @@ public class SalvoApplication {
 			salvoRespository.save(salvo2);
 			salvoRespository.save(salvo3);
 			salvoRespository.save(salvo4);
+
+			scoreRepository.save(score1);
+			scoreRepository.save(score2);
+			scoreRepository.save(score3);
+			scoreRepository.save(score4);
 		};
 	}
 

@@ -30,6 +30,13 @@ public class GamePlayer {
     @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
     Set<Salvo> salvoes;
 
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "score_id", referencedColumnName = "score_id")
+//    private Score score;
+
+    @OneToOne(mappedBy = "gamePlayer")
+    private Score score;
+
     //constructor
     public GamePlayer() {}
 
@@ -65,6 +72,10 @@ public class GamePlayer {
         return salvoes;
     }
 
+    public Score getScore() {
+        return score;
+    }
+
     //Setters
     public void setDate(String date) {
         this.date = date;
@@ -86,6 +97,10 @@ public class GamePlayer {
         this.salvoes = salvoes;
     }
 
+    public void setScore(Score score) {
+        this.score = score;
+    }
+
     @Override
     public String toString() {
         return "GamePlayer{" +
@@ -95,6 +110,7 @@ public class GamePlayer {
                 ", game=" + game +
                 ", ships=" + ships +
                 ", salvoes=" + salvoes +
+                ", score=" + score +
                 '}';
     }
 }
