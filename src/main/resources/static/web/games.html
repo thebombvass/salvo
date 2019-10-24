@@ -65,8 +65,27 @@
         </table>
     </div>
 
+    <div class="container-fluid">
+        <div class="d-flex flex-row-reverse">
+            <button class="btn btn-primary">Start a New Game</button>
+        </div>
+    </div>
 
-    <p id="helper"></p>
+    <div class="container-fluid">
+        <h1 class="text-light">Games Board</h1>
+        <table id="gamesBoard" class="table table-secondary">
+            <thead>
+            <tr>
+                <th>Game Number</th>
+                <th>Started Date</th>
+                <th>Players</th> <!--both in game or one for one-->
+                <th>Status </th> <!--Happening now, needs player, or 'p1 wins!' or 'tie'-->
+                <th></th> <!--Buttons go here 'join game'-->
+            </tr>
+            </thead>
+            <tbody id="gamesBoardGuts"></tbody>
+        </table>
+    </div>
 
     <!--    Jquery-->
     <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
