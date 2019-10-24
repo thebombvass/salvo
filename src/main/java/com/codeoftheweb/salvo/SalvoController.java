@@ -1,10 +1,14 @@
 package com.codeoftheweb.salvo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.GsonBuilderUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,21 +16,43 @@ import java.util.stream.Collectors;
 @RestController
 public class SalvoController {
 
+    private Optional getUserLogged(Authentication auth){
+        System.out.println("here");
+        System.out.println(auth);
+        Optional <Player> userLogged;
+        if(auth==null){
+            userLogged = Optional.empty();
+        }else{
+            userLogged = prepo.findByUsername(auth.getName());
+        }
+        return userLogged;
+    }
+
     //GAME
     @Autowired
     public GameRespository grepo;
 
+
     @RequestMapping("/api/games")
-    public List<Map<String, Object>> getGames() {
-        return grepo.findAll().stream().map(game -> makeGameDTO(game)).collect(Collectors.toList());
+    @ResponseBody
+    public List<Map<String, Object>> getGames(Authentication authentication) {
+        Optional<Player> currentPlayer = getUserLogged(authentication);
+        if (currentPlayer.isPresent()) {
+            return grepo.findAll().stream().map(game -> makeGameDTO(game, currentPlayer.get())).collect(Collectors.toList());
+        } else {
+            //TO DO: can you do this without creating a new instance everytime?
+            Player playa = new Player("null", null);
+            return grepo.findAll().stream().map(game -> makeGameDTO(game, playa)).collect(Collectors.toList());
+        }
+
     }
 
-    private Map<String, Object> makeGameDTO(Game game) {
+    private Map<String, Object> makeGameDTO(Game game, Player currPlayer) {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("currentPlayer", currPlayer);
         dto.put("id", game.getGame_id());
         dto.put("date", game.getDate());
         dto.put("gamePlayer", game.getGamePlayers());
-
         return dto;
     }
 
@@ -40,7 +66,7 @@ public class SalvoController {
     }
 
     private Map<String, Object> makePlayerDTO(Player player) {
-        Map<String, Object> dto= new LinkedHashMap<String, Object>();
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", player.getPlayer_id());
         dto.put("username", player.getUsername());
         dto.put("gamePlayer", player.getGamePlayers());
@@ -91,7 +117,7 @@ public class SalvoController {
     public SalvoRespository sarepo;
 
     @RequestMapping("/api/salvoes")
-    public List <Map<String, Object>> getSalvoes() {
+    public List<Map<String, Object>> getSalvoes() {
         return sarepo.findAll().stream().map(salvo -> makeSalvoesDTO(salvo)).collect(Collectors.toList());
     }
 
@@ -114,4 +140,29 @@ public class SalvoController {
         Game game_view1 = game_view.orElse(new Game());
         return game_view1;
     }
+
+
+    //Create a new User
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @RequestMapping(path = "/app/players", method = RequestMethod.POST)
+    public ResponseEntity<Object> register(
+            @RequestParam String username, @RequestParam String password) {
+        System.out.println(username + " , "+ password);
+
+        if (username.isEmpty() || password.isEmpty()) {
+            System.out.println("Didn't enter both parameters");
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        }
+
+        if (prepo.findByUsername(username).isPresent()) {
+            System.out.println(prepo.findByUsername(username) + " already exists");
+            return new ResponseEntity<>("Name already in use", HttpStatus.FORBIDDEN);
+        }
+
+        prepo.save(new Player(username, passwordEncoder.encode(password)));
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
 }
