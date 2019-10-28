@@ -105,24 +105,29 @@ $(function() {
                 console.log(data)
                 let date = data.date.toString()
                 let player1 = data.gamePlayers[0].player.username
-                let player2 = data.gamePlayers[1].player.username
+                let player2 = "Nobody"
+                if  (data.gamePlayers[1]) {
+                    player2 = data.gamePlayers[1].player.username
+                }
                 $('#playersDescription').text(`This game started at ${date} is between ${player1} (you) and ${player2}`)
 
                 //use data from locations to place ships and salvos on the board.
                 //uses setUpShips from above
                 let shipsPlayer1 = data.gamePlayers[0].ships
-                let shipsPlayer2 = data.gamePlayers[1].ships
                 setUpGrid(shipsPlayer1, "ship", 1); //1 - 1
-                setUpGrid(shipsPlayer2, "ship", 2); //2 - 2
-
                 //uses setUpShips to add salvoes
                 let salvoesPlayer1 = data.gamePlayers[0].salvoes
                 console.log(salvoesPlayer1)
-                let salvoesPlayer2 = data.gamePlayers[1].salvoes
-                console.log(salvoesPlayer2)
                 //note - salvoes from one player show up on the board of the other player
                 setTimeout(setUpGrid(salvoesPlayer1, "salvo", 2), 1000); //1 - 2
-                setTimeout(setUpGrid(salvoesPlayer2, "salvo", 1), 1000); //2 - 1
+
+                if (data.gamePlayers[1]) {
+                    let shipsPlayer2 = data.gamePlayers[1].ships
+                    setUpGrid(shipsPlayer2, "ship", 2); //2 - 2
+                    let salvoesPlayer2 = data.gamePlayers[1].salvoes
+                    console.log(salvoesPlayer2)
+                    setTimeout(setUpGrid(salvoesPlayer2, "salvo", 1), 1000); //2 - 1
+                }
             },
             statusCode: {
                 403: function() {

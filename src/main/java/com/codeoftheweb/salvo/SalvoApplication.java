@@ -48,17 +48,19 @@ public class SalvoApplication {
 	//creating games
 	Game game1 = new Game(newDate);
 	Game game2 = new Game(newDate2);
+	Game game3 = new Game(newDate);
 
 	//creating players
-	Player player1 = new Player("mevomvas@bu.edu", PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("123"));
-	Player player2 = new Player("art.vomvas@gmail.com",  PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("P@ssw0rd"));
-	Player player3 = new Player("paullywallnuts@gmail.com",  PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("P@ssw0rd"));
+	Player player1 = new Player("meg@bu.edu", PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("123"));
+	Player player2 = new Player("art@gmail.com",  PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("123"));
+	Player player3 = new Player("paul@gmail.com",  PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("123"));
 
 	//creating gamePlayers
 	GamePlayer gamePlayer1 = new GamePlayer(newDate, game1, player1);
 	GamePlayer gamePlayer2 = new GamePlayer(newDate, game1, player2);
 	GamePlayer gamePlayer3 = new GamePlayer(newDate2, game2, player1);
 	GamePlayer gamePlayer4 = new GamePlayer(newDate2, game2, player3);
+	GamePlayer gamePlayer5 = new GamePlayer(newDate, game3, player1);
 
 	//creating locations (they're gonna be mostly the same to start)
 	List<String> cruiserlocs = Arrays.asList("H2", "H3", "H4");
@@ -118,6 +120,7 @@ public class SalvoApplication {
 		return (args) -> {
 			gameRepository.save(game1);
 			gameRepository.save(game2);
+			gameRepository.save(game3);
 
 			playerRepository.save(player1);
 			playerRepository.save(player2);
@@ -127,6 +130,7 @@ public class SalvoApplication {
 			gamePlayerRepository.save(gamePlayer2);
 			gamePlayerRepository.save(gamePlayer3);
 			gamePlayerRepository.save(gamePlayer4);
+			gamePlayerRepository.save(gamePlayer5);
 
 			shipRepository.save(ship1);
 			shipRepository.save(ship2);
@@ -193,7 +197,6 @@ class WebSecurityConfiguration extends GlobalAuthenticationConfigurerAdapter {
 class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		System.out.println("logging in/out");
 		http.authorizeRequests()
 				.antMatchers("/**").permitAll();
 		http.formLogin()

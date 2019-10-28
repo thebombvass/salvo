@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,8 +18,6 @@ import java.util.stream.Collectors;
 public class SalvoController {
 
     private Optional getUserLogged(Authentication auth){
-        System.out.println("here");
-        System.out.println(auth);
         Optional <Player> userLogged;
         if(auth==null){
             userLogged = Optional.empty();
@@ -40,7 +39,7 @@ public class SalvoController {
         if (currentPlayer.isPresent()) {
             return grepo.findAll().stream().map(game -> makeGameDTO(game, currentPlayer.get())).collect(Collectors.toList());
         } else {
-            //TO DO: can you do this without creating a new instance everytime?
+            //TO DO: can you do this without creating a new instance every time?
             Player playa = new Player("null", null);
             return grepo.findAll().stream().map(game -> makeGameDTO(game, playa)).collect(Collectors.toList());
         }
@@ -130,24 +129,27 @@ public class SalvoController {
         return dto;
     }
 
-
     //GAME VIEW
     @RequestMapping("api/game_view/{nn}")
     public ResponseEntity<Object> showGame(Authentication authentication, @PathVariable Long nn) {
             Optional<Game> game_view = grepo.findById(nn);
             Game game_view1 = game_view.orElse(new Game());
-            String user1 = game_view1.getPlayers().get(0).getUsername();
-            String user2 = game_view1.getPlayers().get(1).getUsername();
+
+            ArrayList<String> users = new ArrayList<>();
+            for (int i=0; i<game_view1.getPlayers().size(); i++)  {
+                users.add(game_view1.getPlayers().get(i).getUsername());
+            }
+
             if (getUserLogged(authentication).isPresent()) {
                 Player loggedInPlayer = (Player) getUserLogged(authentication).get();
                 String loggedInPlayer1 = loggedInPlayer.getUsername();
-                if (loggedInPlayer1 == user1 || loggedInPlayer1 == user2) {
+                if (users.contains(loggedInPlayer1)) {
                     return new ResponseEntity<>(game_view1, HttpStatus.ACCEPTED);
                 } else {
                     return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
                 }
             } else {
-            return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
             }
     }
 
@@ -159,7 +161,6 @@ public class SalvoController {
     @RequestMapping(path = "/app/players", method = RequestMethod.POST)
     public ResponseEntity<Object> register(
             @RequestParam String username, @RequestParam String password) {
-        System.out.println(username + " , "+ password);
 
         if (username.isEmpty() || password.isEmpty()) {
             System.out.println("Didn't enter both parameters");
@@ -175,4 +176,54 @@ public class SalvoController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    //Creating a new Game
+    @RequestMapping(path = "/api/games", method = RequestMethod.POST)
+    public ResponseEntity<Object> createGame(
+            @RequestParam String creator) {
+        if (creator == null) {
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        } else {
+            Player player = prepo.findByUsername(creator).orElse(new Player());
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyy HH:mm:ss");
+            String newDate = formatter.format(date);
+
+            Game game = new Game(newDate);
+            GamePlayer gamePlayer = new GamePlayer(newDate, game, player);
+
+
+            grepo.save(game);
+            gprepo.save(gamePlayer);
+
+            return new ResponseEntity<>(game.getGame_id(), HttpStatus.CREATED);
+        }
+    }
+
+    //adding a player to a newly created game
+    @RequestMapping(path = "/api/gameplayers", method = RequestMethod.POST)
+    public ResponseEntity<Object> joinGame(
+            @RequestParam String game_id, @RequestParam String username) {
+        if (game_id == null) {
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        } else if (username == null) {
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        } else {
+            //getting the game
+            Long game_id1 = Long.parseLong(game_id);
+            Game game = grepo.findById(game_id1).orElse(new Game());
+
+            //getting the player currently logged in
+            Player player = prepo.findByUsername(username).orElse(new Player());
+
+            //getting current date
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyy HH:mm:ss");
+            String newDate = formatter.format(date);
+
+            //creating new Gameplayer
+            GamePlayer gamePlayer = new GamePlayer(newDate, game, player);
+            gprepo.save(gamePlayer);
+            return new ResponseEntity<>(gamePlayer.getGameplayer_id(), HttpStatus.CREATED);
+        }
+    }
 }
