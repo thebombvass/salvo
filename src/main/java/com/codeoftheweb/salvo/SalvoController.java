@@ -133,12 +133,22 @@ public class SalvoController {
 
     //GAME VIEW
     @RequestMapping("api/game_view/{nn}")
-    @ResponseBody
-    public Game findGP(@PathVariable Long nn) {
-
-        Optional<Game> game_view = grepo.findById(nn);
-        Game game_view1 = game_view.orElse(new Game());
-        return game_view1;
+    public ResponseEntity<Object> showGame(Authentication authentication, @PathVariable Long nn) {
+            Optional<Game> game_view = grepo.findById(nn);
+            Game game_view1 = game_view.orElse(new Game());
+            String user1 = game_view1.getPlayers().get(0).getUsername();
+            String user2 = game_view1.getPlayers().get(1).getUsername();
+            if (getUserLogged(authentication).isPresent()) {
+                Player loggedInPlayer = (Player) getUserLogged(authentication).get();
+                String loggedInPlayer1 = loggedInPlayer.getUsername();
+                if (loggedInPlayer1 == user1 || loggedInPlayer1 == user2) {
+                    return new ResponseEntity<>(game_view1, HttpStatus.ACCEPTED);
+                } else {
+                    return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
+                }
+            } else {
+            return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
+            }
     }
 
 

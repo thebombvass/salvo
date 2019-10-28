@@ -64,7 +64,15 @@ $(function() {
                 status = game.gamePlayer[1].player.username + " won!"
             }
 
-            tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button class="btn btn-dark"> Join Game! </button></td></tr>`
+            let gameURL = window.location.href.replace(window.location.pathname, "/web/game.html?gp="+gameNumber)
+            console.log(gameURL)
+
+            let currentPlayer = game.currentPlayer.username
+            if (players.includes(currentPlayer)) {
+                tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button class="btn btn-dark"><a href=${gameURL}> Go to game! </a></button></td></tr>`
+            } else {
+                tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td></td></tr>`
+            }
         })
         $("#gamesBoardGuts").html(tableGuts);
     }
@@ -78,11 +86,13 @@ $(function() {
             $("#logout-form").hide()
             $("#login-form").show()
             $("#register-form").show()
+            loadGameData()
         } else {
             console.log(data[0].currentPlayer.username)
             $("#logout-form").show()
             $("#login-form").hide()
             $("#register-form").hide()
+            loadGameData()
         }
         })
         .fail(function() {console.log("failure")})
@@ -170,6 +180,9 @@ $(function() {
 
 // ****************** function calls and Ajax call *********************** //
 
+    //is there an authenticated user on load?
+    isAuthenticated()
+
     //creating the leader board on load
     loadLeaderData();
     loadGameData();
@@ -186,9 +199,6 @@ $(function() {
     $('#register-form').submit(wrapperFunctionReg)
     $('#register-form').submit(() => {
         $('#register-form').trigger("reset")})
-
-    //is there an authenticated user on load?
-    isAuthenticated()
 
 })
 
