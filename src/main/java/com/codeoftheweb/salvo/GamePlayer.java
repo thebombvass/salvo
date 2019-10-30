@@ -30,9 +30,6 @@ public class GamePlayer {
     @OneToMany(mappedBy = "gamePlayer", fetch = FetchType.EAGER)
     Set<Salvo> salvoes;
 
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "score_id", referencedColumnName = "score_id")
-//    private Score score;
 
     @OneToOne(mappedBy = "gamePlayer")
     private Score score;

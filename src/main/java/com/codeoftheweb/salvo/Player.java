@@ -22,9 +22,6 @@ public class Player {
     @OneToMany(mappedBy = "player", fetch= FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
-//    @OneToMany(mappedBy = "player", fetch= FetchType.EAGER)
-//    Set<Score> scores;
-
     @JsonIgnore
     public List<Game> getGames() {
         return gamePlayers.stream().map(sub -> sub.getGame()).collect(Collectors.toList());

@@ -125,7 +125,8 @@ public class SalvoController {
         dto.put("id", salvo.getSalvo_id());
         dto.put("turnNumber", salvo.getTurn_number());
         dto.put("gamePlayer", salvo.getGamePlayer().getGameplayer_id());
-        dto.put("locations", salvo.getLocations());
+        dto.put("locations", salvo.getLocation());
+        dto.put("hitMiss", salvo.getHitMiss());
         return dto;
     }
 
@@ -135,22 +136,72 @@ public class SalvoController {
             Optional<Game> game_view = grepo.findById(nn);
             Game game_view1 = game_view.orElse(new Game());
 
+            //Gameplayer set -> Array so that it can be indexed
+            List<GamePlayer> mainList = new ArrayList<GamePlayer>();
+            mainList.addAll(game_view1.getGamePlayers());
+
+            //making an array of just the usernames
             ArrayList<String> users = new ArrayList<>();
-            for (int i=0; i<game_view1.getPlayers().size(); i++)  {
-                users.add(game_view1.getPlayers().get(i).getUsername());
+            for (int i=0; i<game_view1.getGamePlayers().size(); i++)  {
+                users.add(mainList.get(i).getPlayer().getUsername());
             }
 
+            //checking that someone is logged in
             if (getUserLogged(authentication).isPresent()) {
                 Player loggedInPlayer = (Player) getUserLogged(authentication).get();
                 String loggedInPlayer1 = loggedInPlayer.getUsername();
+
+                //checking that the person who is logged is at least a part of this game
                 if (users.contains(loggedInPlayer1)) {
-                    return new ResponseEntity<>(game_view1, HttpStatus.ACCEPTED);
+                    //if current user is in the gameplayer[0] space. Will always happen if there is one player. Will also happen if there are 2 and current user is player[0]
+                    if (mainList.get(0).getPlayer().getUsername() == loggedInPlayer1) {
+                        return new ResponseEntity<>(makeP0GameView(game_view1, mainList), HttpStatus.ACCEPTED);
+                    //will only happen if there is a gp[1] and current user is gp[1]
+                    } else {
+                        return new ResponseEntity<>(makeP1GameView(game_view1, mainList), HttpStatus.ACCEPTED);
+                    }
+
+                //logged in but not a part of this game
                 } else {
                     return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
                 }
+
+            //if no one is logged in
             } else {
                 return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
             }
+    }
+
+    //Information to return in body if Current user is gp[0]
+    private Map<String, Object> makeP0GameView(Game game, List<GamePlayer> gamePlayer) {
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", game.getGame_id());
+        dto.put("date", game.getDate());
+        dto.put("username1",gamePlayer.get(0).getPlayer().getUsername());
+        dto.put("ships1", gamePlayer.get(0).getShips());
+        dto.put("salvoes1", gamePlayer.get(0).getSalvoes());
+        //checking if there is a second player or not
+        if(gamePlayer.size()>1) {
+            dto.put("username2", gamePlayer.get(1).getPlayer().getUsername());
+            dto.put("salvoes2", gamePlayer.get(1).getSalvoes());
+        } else {
+            dto.put("username2", null);
+            dto.put("salvoes2", null);
+        }
+        return dto;
+    }
+
+    //Information to return in body if Current user is gp[1]
+    private Map<String, Object> makeP1GameView(Game game, List<GamePlayer> gamePlayer) {
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", game.getGame_id());
+        dto.put("date", game.getDate());
+        dto.put("username1",gamePlayer.get(1).getPlayer().getUsername());
+        dto.put("ships1", gamePlayer.get(1).getShips());
+        dto.put("salvoes1", gamePlayer.get(1).getSalvoes());
+        dto.put("username2", gamePlayer.get(0).getPlayer().getUsername());
+        dto.put("salvoes2", gamePlayer.get(0).getSalvoes());
+        return dto;
     }
 
 

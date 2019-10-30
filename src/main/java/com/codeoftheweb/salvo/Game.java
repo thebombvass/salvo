@@ -20,8 +20,6 @@ public class Game {
     @OneToMany(mappedBy = "game", fetch = FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
-//    @OneToMany(mappedBy = "player", fetch= FetchType.EAGER)
-//    Set<Score> scores;
 
     public void addGamePlayer(GamePlayer gamePlayer) {
         gamePlayer.setGame(this);
@@ -33,7 +31,7 @@ public class Game {
         return gamePlayers.stream().map(sub -> sub.getPlayer()).collect(Collectors.toList());
     }
 
-    //some kinda construction?
+    //constructor
     public Game() {}
 
     public Game(String date) {
@@ -49,18 +47,26 @@ public class Game {
         return date;
     }
 
+    public Set<GamePlayer> getGamePlayers() {
+        return gamePlayers;
+    }
+
 
     //setters
     public void setDate(String date) {
         this.date = date;
     }
 
-    public Set<GamePlayer> getGamePlayers() {
-        return gamePlayers;
+    public void setGamePlayers(Set<GamePlayer> gamePlayers) {
+        this.gamePlayers = gamePlayers;
     }
 
     @Override
     public String toString() {
-        return date;
+        return "Game{" +
+                "game_id=" + game_id +
+                ", date='" + date + '\'' +
+                ", gamePlayers=" + gamePlayers +
+                '}';
     }
 }

@@ -3,6 +3,15 @@
 //main function
 $(function() {
 
+    let carrierDummy = []
+    let cruiserDummy = []
+    let battleshipDummy = []
+    let destroyerDummy = []
+    let shipsDummy = {carrierDummy: carrierDummy, cruiserDummy: carrierDummy, battleshipDummy: battleshipDummy, destroyerDummy: destroyerDummy}
+
+    let occupiedBoxArray = []
+    let horzVertz = ""
+
     //*******************Function Creation ****************
 
     //creates the table showing your own boats and how they doing
@@ -21,39 +30,28 @@ $(function() {
 
     //highlights specific cells on the players board based on int inputs for row and column
     //used later on in ajax call to set up ships
-    function createShip(row, col, board) {
+    function createShip(row, col) {
         //TO DO: add parsing for a->1 b->2 etc.
-        if (board == 1) {
-            $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).addClass('bg-warning');
-        } if (board == 2) {
-            $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).addClass('bg-warning');
-        }
+        $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).addClass('bg-warning');
     }
 
     //adds a red 'B' for 'bomb' to specific cells on the players board based on int inputs for row and column
     //used later on in setUpGrid
-    function createSalvo(row, col, board) {
-            let guy;
-            if (board == 1) {
-                guy = $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col)[0]
-            } else if (board == 2) {
-                guy = $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col)[0]
+    function createSalvo(row, col, hitMiss, board) {
+        if (board == 1) {
+            if (hitMiss == "H") {
+                $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+            } else if (hitMiss == "M") {
+                $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
             }
-
-            if(guy.hasAttribute('class')) {
-                if (board == 1) {
-                    $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
-                } if (board == 2) {
-                    $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
-                }
-            } else {
-                if (board == 1) {
-                    $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
-                } if (board == 2) {
-                    $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
-                }
+        } else if (board == 2) {
+            if (hitMiss == "H") {
+                $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+            } else if (hitMiss == "M") {
+                $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
             }
         }
+    }
 
     //changing the letter connotations into numbers for setUpShips input (string)
     function parseColumns(col) {
@@ -67,66 +65,97 @@ $(function() {
     //'board'-int- to determine if these will be set up on your board or your opponents board
     //called inside the ajax call so create the entire 2 boards with ships and slavoes
     function setUpGrid(array, shipSalvo, board) {
-        console.log(shipSalvo)
         let initialLocations = []
-        for (let i=0; i < array.length; i++) {
-            let locations = array[i].locations
-            for (let i=0; i < locations.length; i++) {
-                let theCol = parseColumns(locations[i][0])
-                let theRow = locations[i].slice(1)
-                initialLocations.push({theRow: theRow, theCol: theCol})
+        if (shipSalvo == "ship") {
+            for (let i=0; i < array.length; i++) {
+                let locations = array[i].locations
+                for (let i=0; i < locations.length; i++) {
+                    let theCol = parseColumns(locations[i][0])
+                    let theRow = locations[i].slice(1)
+                    initialLocations.push({theRow: theRow, theCol: theCol})
+                }
+            }
+            for (let i=0; i < initialLocations.length; i++) {
+                param1 = initialLocations[i].theRow
+                param2 = initialLocations[i].theCol
+                createShip(param1, param2)
             }
         }
-        for (let i=0; i < initialLocations.length; i++) {
-            param1 = initialLocations[i].theRow
-            param2 = initialLocations[i].theCol
-            if (shipSalvo == "ship") {
-                createShip(param1, param2, board)
-            } else if (shipSalvo == "salvo") {
-                createSalvo(param1, param2, board)
-            } else {
+
+        if (shipSalvo == "salvo") {
+            for (let i=0; i < array.length; i++) {
+                let salvo = array[i]
+                let theCol = parseColumns(salvo.location[0])
+                let theRow = salvo.location.slice(1)
+                let hitMiss = salvo.hitMiss
+                initialLocations.push({theRow: theRow, theCol: theCol, hitMiss: hitMiss})
+            }
+            for (let i=0; i < initialLocations.length; i++) {
+                param1 = initialLocations[i].theRow
+                param2 = initialLocations[i].theCol
+                param3 = initialLocations[i].hitMiss
+                createSalvo(param1, param2, param3, board)
             }
         }
     }
 
-    //*****************Function Calls *******************
-    //display your board on the page
-    createBoards()
+    //testing if there exists an authenticated user so that we can show the proper login/logout forms
+    function whosAuthenticated() {
+        $.get("/api/games")
+        .done(function(data) {
+        if (data[0].currentPlayer.username == "null") {
+            theCurrentUser = null
+        } else {
+            theCurrentUser = data[0].currentPlayer.username;
+        }
+        })
+        .fail(function() {console.log("failure")})
+    }
 
-    let pageContext = window.location.hostname +":"+ window.location.port
-    let pageQuery = new URLSearchParams(window.location.search).get("gp")
+    //function that appropriately fills the box (if there) of ships during the ship building phase in the beginning of the game
+    function fillShipsToBuildBox() {
+        //check which ships are available for the list of ships to show
+        let shipsToShow = {}
+        for (var key in shipsDummy) {
+            if (shipsDummy[key].length == 0) {
+                shipsToShow[key] = shipsDummy[key]
+            }
+        }
+        console.log(shipsToShow)
+    }
 
-        //ajax call to get game information and then do some stuff w it
+    //ajax call to get game information specific to the user logged in
+    function loadGameInfo(pageContext, pageQuery) {
         $.ajax({
             type: 'GET',
             url: `http://${pageContext}/api/game_view/${pageQuery}`,
             success: function(data) {
+            console.log(data)
                 //dynamically add data relevant to this game
-                console.log(data)
-                let date = data.date.toString()
-                let player1 = data.gamePlayers[0].player.username
-                let player2 = "Nobody"
-                if  (data.gamePlayers[1]) {
-                    player2 = data.gamePlayers[1].player.username
-                }
+                let date = data.date
+                let player1 = data.username1;
+                let shipsPlayer1 = data.ships1;
+                let salvoesPlayer1 = data.salvoes1;
+                let player2 =""
+
+                if (shipsPlayer1 == "") {
+                    console.log("Enter the Dragon")
+                    $('#boxShipsToBuildContainer').show()
+                    fillShipsToBuildBox();
+                } else {
+                    setUpGrid(shipsPlayer1, "ship", 1); //1 - 1
+                    setUpGrid(salvoesPlayer1, "salvo", 2)//1 - 2
+
+                    //if there is no second player
+                    if (data.username2 == null) {
+                        player2 = "[Waiting for another player to join...]"
+                    //if there is a second player
+                    } else {
+                        player2 = data.username2;
+                        let salvoesPlayer2 = data.salvoes2;
+                        setUpGrid(salvoesPlayer2, "salvo", 1); //2-1
+                    }
                 $('#playersDescription').text(`This game started at ${date} is between ${player1} (you) and ${player2}`)
-
-                //use data from locations to place ships and salvos on the board.
-                //uses setUpShips from above
-                let shipsPlayer1 = data.gamePlayers[0].ships
-                setUpGrid(shipsPlayer1, "ship", 1); //1 - 1
-                //uses setUpShips to add salvoes
-                let salvoesPlayer1 = data.gamePlayers[0].salvoes
-                console.log(salvoesPlayer1)
-                //note - salvoes from one player show up on the board of the other player
-                setTimeout(setUpGrid(salvoesPlayer1, "salvo", 2), 1000); //1 - 2
-
-                if (data.gamePlayers[1]) {
-                    let shipsPlayer2 = data.gamePlayers[1].ships
-                    setUpGrid(shipsPlayer2, "ship", 2); //2 - 2
-                    let salvoesPlayer2 = data.gamePlayers[1].salvoes
-                    console.log(salvoesPlayer2)
-                    setTimeout(setUpGrid(salvoesPlayer2, "salvo", 1), 1000); //2 - 1
                 }
             },
             statusCode: {
@@ -135,11 +164,24 @@ $(function() {
                     $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but you do not have access to this page. Please return home and log in to see your games</h2>`)
                 },
                 500: function() {
-                    console.log("403")
+                    console.log("500")
                     $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but we don't recognize this URL. Please return home and log in to see your games</h2>`)
                 }
             }
         });
+    }
+
+
+    //*****************Function Calls *******************
+    //display your board on the page
+    $('#boxShipsToBuildContainer').hide()
+
+    createBoards();
+
+    let pageContext = window.location.hostname +":"+ window.location.port
+    let pageQuery = new URLSearchParams(window.location.search).get("gp")
+
+    loadGameInfo(pageContext, pageQuery);
 
 //end of main
 });

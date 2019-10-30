@@ -97,15 +97,11 @@ public class SalvoApplication {
 	Ship ship15 = new Ship("destroyer", gamePlayer4, destroyerlocs1);
 	Ship ship16 = new Ship("aircraftcarrier", gamePlayer4, aircraftcarrierlocs1);
 
-	//creating salvo locations (they're all gonna have the same board to start)
-	List<String> salvolocs = Arrays.asList("A1", "D4");
-	List<String> salvolocs1 = Arrays.asList("H4", "H8");
-
 	//creating salvos for GP1-4
-	Salvo salvo1 = new Salvo(1, gamePlayer1, salvolocs);
-	Salvo salvo2 = new Salvo(1, gamePlayer2, salvolocs1);
-	Salvo salvo3 = new Salvo(1, gamePlayer2, salvolocs);
-	Salvo salvo4 = new Salvo(1, gamePlayer1, salvolocs1);
+	Salvo salvo1 = new Salvo(1, gamePlayer1, "A1", "M");
+	Salvo salvo2 = new Salvo(1, gamePlayer1, "D4", "M");
+	Salvo salvo3 = new Salvo(1, gamePlayer2, "H4","H" );
+	Salvo salvo4 = new Salvo(1, gamePlayer2, "H8", "M");
 
 
 	//creating scores for games
