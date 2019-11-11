@@ -14,35 +14,48 @@
         <p class="text-light">
             To start the game, please position your ships on the board by dragging and dropping them onto your board. If you are not happy with your placement you can remove the ship and place it again by clicking the 'remove' button. Chose if your ships are positioned vertically or horizontally by clicking the radio buttons below. Once your ships are all placed, click the 'Save' button below
         </p>
-        <div id="boxShipsToBuild" class="border border-info rounded bg-light text-center">
-            <div class="row">
-                <div class="col-md-3">Carrier</div>
-                <div class="col-md-3">Battleship</div>
-                <div class="col-md-3">Cruiser</div>
-                <div class="col-md-3">Destroyer</div>
-            </div>
-            <div class="row">
-                <div class="col-md-3"></div>
-                <div class="col-md-3"></div>
-                <div class="col-md-3"></div>
-                <div class="col-md-3"></div>
+        <div class="border border-info rounded bg-light text-center p-2">
+            <div id="boxShipsToBuild">
+                <div class="row">
+                    <div class="col-md-3">Carrier</div>
+                    <div class="col-md-3">Battleship</div>
+                    <div class="col-md-3">Cruiser</div>
+                    <div class="col-md-3">Destroyer</div>
+                </div>
+                <div class="row" style="height:140px">
+                    <div id="carrierPic" class="col-md-3 d-flex align-items-center justify-content-center"></div>
+                     <div id="battleshipPic" class="col-md-3 d-flex align-items-center justify-content-center"></div>
+                    <div id="cruiserPic" class="col-md-3 d-flex align-items-center justify-content-center"></div>
+                   <div id="destroyerPic" class="col-md-3 d-flex align-items-center justify-content-center"></div>
+               </div>
             </div>
         </div>
-        <p></p>
-        <button class="btn btn-primary"> Save ship placement </button>
+
+        <div class="container-fluid m-2">
+            <div class="d-flex justify-content-between">
+            <div class="text-light w-25">
+                <input type="radio" name="orientation" id="horizontalRad" value="H" checked> Horizontal
+                <input type="radio" name="orientation" id="verticalRad" value="V"> Vertical
+            </div>
+            <div>
+                <small class="text-light">Once you click save you cannot go back</small>
+                <button id='saveBtn' class="btn btn-primary" disabled> Save ship placement </button>
+            </div>
+            </div>
+        </div>
     </div>
 
     <div class="container-fluid">
     <div class="row">
-        <div class="col-md">
+        <div class="col-lg">
             <p class="text-center text-light">Your Ships</p>
             <table id="yourBoard" class="table table-bordered table-hover table-primary text-center">
                 <!-- The battleship table should be injected here via jquery -->
             </table>
         </div>
 
-        <div class="col-md">
-            <p class="text-center text-light">Your Opponents Ships</p>
+        <div class="col-lg">
+            <p class="text-center text-light">Your Shots</p>
             <table id="opponentBoard" class="table table-bordered table-primary text-center">
                 <!-- The battleship table should be injected here via jquery -->
             </table>

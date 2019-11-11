@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @RestController
 public class SalvoController {
 
+    //handling who (if anyone) is logged in
     private Optional getUserLogged(Authentication auth){
         Optional <Player> userLogged;
         if(auth==null){
@@ -27,10 +28,11 @@ public class SalvoController {
         return userLogged;
     }
 
+    //***for retrieving information from the database ... ***
+
     //GAME
     @Autowired
     public GameRespository grepo;
-
 
     @RequestMapping("/api/games")
     @ResponseBody
@@ -86,7 +88,7 @@ public class SalvoController {
         dto.put("id", gamePlayer.getGameplayer_id());
         dto.put("date", gamePlayer.getDate());
         dto.put("game_id", gamePlayer.getGame().getGame_id());
-        dto.put("player_id", gamePlayer.getPlayer().getPlayer_id());
+        dto.put("player_id", gamePlayer.getPlayer().getUsername());
         dto.put("ships", gamePlayer.getShips());
         dto.put("salvoes", gamePlayer.getSalvoes());
         dto.put("score", gamePlayer.getScore());
@@ -130,7 +132,7 @@ public class SalvoController {
         return dto;
     }
 
-    //GAME VIEW
+    //GAME VIEW - gives all the info needed for playing an actual game
     @RequestMapping("api/game_view/{nn}")
     public ResponseEntity<Object> showGame(Authentication authentication, @PathVariable Long nn) {
             Optional<Game> game_view = grepo.findById(nn);
@@ -205,7 +207,7 @@ public class SalvoController {
     }
 
 
-    //Create a new User
+    //Creating a new user in the db from the user interface
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -227,7 +229,7 @@ public class SalvoController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    //Creating a new Game
+    //Creating a new Game in the db from the user interface
     @RequestMapping(path = "/api/games", method = RequestMethod.POST)
     public ResponseEntity<Object> createGame(
             @RequestParam String creator) {
@@ -250,7 +252,7 @@ public class SalvoController {
         }
     }
 
-    //adding a player to a newly created game
+    //adding a player2 who wants to join to a newly created game (a.k.a adding a gameplayer to the db via ui)
     @RequestMapping(path = "/api/gameplayers", method = RequestMethod.POST)
     public ResponseEntity<Object> joinGame(
             @RequestParam String game_id, @RequestParam String username) {
@@ -277,4 +279,72 @@ public class SalvoController {
             return new ResponseEntity<>(gamePlayer.getGameplayer_id(), HttpStatus.CREATED);
         }
     }
+
+    @RequestMapping(path = "/api/ships", method = RequestMethod.POST)
+    public ResponseEntity<Object> placeShips(
+            //string username maybe change? linked to GP not P
+            @RequestParam String gamePlayer_id, @RequestParam String ship, @RequestParam(value="locs[]") List<String> locs) {
+        if (gamePlayer_id.isEmpty() || ship.isEmpty() || locs.isEmpty()) {
+            System.out.println("Missing information in ship creation");
+            return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        }
+
+        Optional<GamePlayer> thegp = gprepo.findById(Long.parseLong(gamePlayer_id));
+        Ship ship2 = new Ship(ship,thegp.orElse(new GamePlayer()),locs);
+        shrepo.save(ship2);
+        return new ResponseEntity<>(ship2, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(path = "/api/salvoes", method=RequestMethod.POST)
+    public ResponseEntity<Object> addSalvo(Authentication authentication,
+            @RequestParam String gamePlayer_id, @RequestParam String turnNo,
+            @RequestParam String loc, @RequestParam String gameId) {
+        if (getUserLogged(authentication).isPresent()) {
+            //find the proper gameplayer matching the id given
+            Optional<GamePlayer> thegp = gprepo.findById(Long.parseLong(gamePlayer_id));
+
+            //**TO DO - this is where I would add an UPDATE to a ship to add 'hits' and determine if its sunk or not
+            //** problem is, how do we know if a shot is a hit or miss? this logic must be added in java//
+            Game theGame = grepo.findById(Long.parseLong(gameId)).orElse(new Game());
+
+            String hitMiss = "";
+
+            //Gameplayer set -> Array so that it can be indexed
+            List<GamePlayer> mainList = new ArrayList<GamePlayer>();
+            mainList.addAll(theGame.getGamePlayers());
+            if(mainList.get(0).getGameplayer_id() == Long.parseLong(gamePlayer_id)) {
+
+                //getting opponents ships
+                List<Ship> oppShips = new ArrayList<>();
+                oppShips.addAll(mainList.get(1).getShips());
+                for (int i=0; i<oppShips.size(); i++) {
+                   Long shipId = oppShips.get(i).getShip_id();
+                   for(int j=0; j<oppShips.get(i).getLocations().size(); j++) {
+                       if (loc == oppShips.get(i).getLocations().get(j)) {
+                           hitMiss= "H";
+                           //** TO DO: add here to update the ship using shipId that you got above to add hit
+                       }
+                   }
+                }
+                if (hitMiss == "") {
+                    hitMiss = "M";
+                }
+
+            } else if (mainList.get(1).getGameplayer_id() == Long.parseLong(gamePlayer_id)) {
+                //**TO DO: add the shit here, same as the if above this. Also test w some souts if this even works
+                mainList.get(0).getShips(); //THIS GET changed to UPDATE. perhaps get ship id here and update elsewhere?
+            }
+
+
+            //create the salvo
+            Salvo salvo2 = new Salvo(Integer.parseInt(turnNo), thegp.orElse(new GamePlayer()), loc, hitMiss);
+            sarepo.save(salvo2);
+
+            return new ResponseEntity<>(salvo2, HttpStatus.CREATED);
+            //alter ship
+        } else {
+            return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
+        }
+    }
+
 }

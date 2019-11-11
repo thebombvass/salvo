@@ -63,39 +63,39 @@ public class SalvoApplication {
 	GamePlayer gamePlayer5 = new GamePlayer(newDate, game3, player1);
 
 	//creating locations (they're gonna be mostly the same to start)
-	List<String> cruiserlocs = Arrays.asList("H2", "H3", "H4");
-	List<String> submarinelocs = Arrays.asList("B5", "C5", "D5");
-	List<String> destroyerlocs = Arrays.asList("G9", "G10");
-	List<String> aircraftcarrierlocs = Arrays.asList("D7", "E7", "F7", "G7", "H7");
+	List<String> cruiserlocs = Arrays.asList("7-4", "7-3", "7-2");
+	List<String> battleshiplocs = Arrays.asList("1-5", "2-5", "3-5");
+	List<String> destroyerlocs = Arrays.asList("6-9", "6-8");
+	List<String> carrierlocs = Arrays.asList("2-7", "3-7", "4-7", "5-7", "6-7");
 
-	List<String> cruiserlocs1 = Arrays.asList("C2", "C3", "C4");
-	List<String> submarinelocs1 = Arrays.asList("A5", "B5", "C5");
-	List<String> destroyerlocs1 = Arrays.asList("H9", "H10");
-	List<String> aircraftcarrierlocs1 = Arrays.asList("F7", "G7", "H7", "I7", "J7");
+	List<String> cruiserlocs1 = Arrays.asList("2-4", "2-3", "2-2");
+	List<String> battleshiplocs1 = Arrays.asList("0-5", "1-5", "2-5");
+	List<String> destroyerlocs1 = Arrays.asList("7-9", "7-8");
+	List<String> carrierlocs1 = Arrays.asList("5-7", "6-7", "7-7", "8-7", "9-7");
 
 	//creating ships for GP1
 	Ship ship1 = new Ship("cruiser", gamePlayer1, cruiserlocs);
-	Ship ship2 = new Ship("submarine", gamePlayer1, submarinelocs);
+	Ship ship2 = new Ship("battleship", gamePlayer1, battleshiplocs);
 	Ship ship3 = new Ship("destroyer", gamePlayer1, destroyerlocs);
-	Ship ship4 = new Ship("aircraftcarrier", gamePlayer1, aircraftcarrierlocs);
+	Ship ship4 = new Ship("carrier", gamePlayer1, carrierlocs);
 
 	//creating ships for GP2
 	Ship ship5 = new Ship("cruiser", gamePlayer2, cruiserlocs1);
-	Ship ship6 = new Ship("submarine", gamePlayer2, submarinelocs1);
+	Ship ship6 = new Ship("battleship", gamePlayer2, battleshiplocs1);
 	Ship ship7 = new Ship("destroyer", gamePlayer2, destroyerlocs1);
-	Ship ship8 = new Ship("aircraftcarrier", gamePlayer2, aircraftcarrierlocs1);
+	Ship ship8 = new Ship("carrier", gamePlayer2, carrierlocs1);
 
 	//creating ships for GP3
 	Ship ship9 = new Ship("cruiser", gamePlayer3, cruiserlocs);
-	Ship ship10 = new Ship("submarine", gamePlayer3, submarinelocs);
+	Ship ship10 = new Ship("battleship", gamePlayer3, battleshiplocs);
 	Ship ship11 = new Ship("destroyer", gamePlayer3, destroyerlocs);
-	Ship ship12 = new Ship("aircraftcarrier", gamePlayer3, aircraftcarrierlocs);
+	Ship ship12 = new Ship("carrier", gamePlayer3, carrierlocs);
 
 	//creating ships for GP4
 	Ship ship13 = new Ship("cruiser", gamePlayer4, cruiserlocs1);
-	Ship ship14 = new Ship("submarine", gamePlayer4, submarinelocs1);
+	Ship ship14 = new Ship("battleship", gamePlayer4, battleshiplocs1);
 	Ship ship15 = new Ship("destroyer", gamePlayer4, destroyerlocs1);
-	Ship ship16 = new Ship("aircraftcarrier", gamePlayer4, aircraftcarrierlocs1);
+	Ship ship16 = new Ship("carrier", gamePlayer4, carrierlocs1);
 
 	//creating salvos for GP1-4
 	Salvo salvo1 = new Salvo(1, gamePlayer1, "A1", "M");
