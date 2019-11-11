@@ -14,6 +14,7 @@ public class Ship {
     @GenericGenerator(name="native", strategy = "native")
     private long ship_id;
     private String shipType;
+    private int hits;
 
 
     @ElementCollection
@@ -25,10 +26,11 @@ public class Ship {
 
     public Ship() {}
 
-    public Ship(String shipType, GamePlayer gamePlayer, List<String> locations) {
+    public Ship(String shipType, GamePlayer gamePlayer, List<String> locations, int hits) {
         this.shipType = shipType;
         this.gamePlayer = gamePlayer;
         this.locations = locations;
+        this.hits = hits;
     }
 
     //Getters
@@ -49,6 +51,10 @@ public class Ship {
         return locations;
     }
 
+    public int getHits() {
+        return hits;
+    }
+
     //Setters
     public void setShip_id(long ship_id) {
         this.ship_id = ship_id;
@@ -66,6 +72,10 @@ public class Ship {
         this.locations = locations;
     }
 
+    public void setHits(int hits) {
+        this.hits = hits;
+    }
+
     //toString
 
     @Override
@@ -73,6 +83,7 @@ public class Ship {
         return "Ship{" +
                 "ship_id=" + ship_id +
                 ", shipType='" + shipType + '\'' +
+                ", hits=" + hits +
                 ", locations=" + locations +
                 ", gamePlayer=" + gamePlayer +
                 '}';

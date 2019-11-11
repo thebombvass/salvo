@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -110,6 +111,7 @@ public class SalvoController {
         dto.put("shipType", ship.getShipType());
         dto.put("gamePlayer", ship.getGamePlayer().getGameplayer_id());
         dto.put("locations", ship.getLocations());
+        dto.put("hits", ship.getHits());
         return dto;
     }
 
@@ -129,6 +131,24 @@ public class SalvoController {
         dto.put("gamePlayer", salvo.getGamePlayer().getGameplayer_id());
         dto.put("locations", salvo.getLocation());
         dto.put("hitMiss", salvo.getHitMiss());
+        return dto;
+    }
+
+    //SCORE
+    @Autowired
+    private ScoreRepository screpo;
+
+    @RequestMapping("/api/scores")
+    public List<Map<String, Object>> getScores() {
+        return screpo.findAll().stream().map(score -> makeScoresDTO(score)).collect(Collectors.toList());
+    }
+
+    private Map<String, Object> makeScoresDTO(Score score) {
+        Map<String, Object> dto = new LinkedHashMap<String, Object>();
+        dto.put("id", score.getScore_id());
+        dto.put("gamePlayer", score.getGamePlayer().getGameplayer_id());
+        dto.put("gamePlayerName", score.getGamePlayer().getPlayer().getUsername());
+        dto.put("score", score.getScore());
         return dto;
     }
 
@@ -157,10 +177,26 @@ public class SalvoController {
                 if (users.contains(loggedInPlayer1)) {
                     //if current user is in the gameplayer[0] space. Will always happen if there is one player. Will also happen if there are 2 and current user is player[0]
                     if (mainList.get(0).getPlayer().getUsername() == loggedInPlayer1) {
-                        return new ResponseEntity<>(makeP0GameView(game_view1, mainList), HttpStatus.ACCEPTED);
+                        boolean bool;
+                        if (mainList.size() > 1) {
+                            if(mainList.get(1).getShips().size()== 0) {
+                                bool = false;
+                            } else {
+                                bool = true;
+                            }
+                        } else {
+                            bool = false;
+                        }
+                        return new ResponseEntity<>(makeP0GameView(game_view1, mainList, bool), HttpStatus.ACCEPTED);
                     //will only happen if there is a gp[1] and current user is gp[1]
                     } else {
-                        return new ResponseEntity<>(makeP1GameView(game_view1, mainList), HttpStatus.ACCEPTED);
+                        boolean bool;
+                        if(mainList.get(0).getShips().size()==0) {
+                            bool = false;
+                        } else {
+                            bool = true;
+                        }
+                        return new ResponseEntity<>(makeP1GameView(game_view1, mainList, bool), HttpStatus.ACCEPTED);
                     }
 
                 //logged in but not a part of this game
@@ -175,7 +211,7 @@ public class SalvoController {
     }
 
     //Information to return in body if Current user is gp[0]
-    private Map<String, Object> makeP0GameView(Game game, List<GamePlayer> gamePlayer) {
+    private Map<String, Object> makeP0GameView(Game game, List<GamePlayer> gamePlayer, boolean bool) {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", game.getGame_id());
         dto.put("date", game.getDate());
@@ -186,15 +222,17 @@ public class SalvoController {
         if(gamePlayer.size()>1) {
             dto.put("username2", gamePlayer.get(1).getPlayer().getUsername());
             dto.put("salvoes2", gamePlayer.get(1).getSalvoes());
+            dto.put("shipsExist", bool);
         } else {
             dto.put("username2", null);
             dto.put("salvoes2", null);
+            dto.put("shipsExist", bool);
         }
         return dto;
     }
 
     //Information to return in body if Current user is gp[1]
-    private Map<String, Object> makeP1GameView(Game game, List<GamePlayer> gamePlayer) {
+    private Map<String, Object> makeP1GameView(Game game, List<GamePlayer> gamePlayer, boolean bool) {
         Map<String, Object> dto = new LinkedHashMap<String, Object>();
         dto.put("id", game.getGame_id());
         dto.put("date", game.getDate());
@@ -203,6 +241,7 @@ public class SalvoController {
         dto.put("salvoes1", gamePlayer.get(1).getSalvoes());
         dto.put("username2", gamePlayer.get(0).getPlayer().getUsername());
         dto.put("salvoes2", gamePlayer.get(0).getSalvoes());
+        dto.put("shipsExist", bool);
         return dto;
     }
 
@@ -256,14 +295,17 @@ public class SalvoController {
     @RequestMapping(path = "/api/gameplayers", method = RequestMethod.POST)
     public ResponseEntity<Object> joinGame(
             @RequestParam String game_id, @RequestParam String username) {
+        //getting the game
+        Long game_id1 = Long.parseLong(game_id);
+        Game game = grepo.findById(game_id1).orElse(new Game());
+
         if (game_id == null) {
             return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
         } else if (username == null) {
             return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
+        } else if (game.getPlayers().size() == 2) {
+            return new ResponseEntity<>("There are already two gamePlayers for this game", HttpStatus.FORBIDDEN);
         } else {
-            //getting the game
-            Long game_id1 = Long.parseLong(game_id);
-            Game game = grepo.findById(game_id1).orElse(new Game());
 
             //getting the player currently logged in
             Player player = prepo.findByUsername(username).orElse(new Player());
@@ -280,31 +322,34 @@ public class SalvoController {
         }
     }
 
+    //creating 4 ship entities for a given game & gamePlayer
     @RequestMapping(path = "/api/ships", method = RequestMethod.POST)
     public ResponseEntity<Object> placeShips(
             //string username maybe change? linked to GP not P
-            @RequestParam String gamePlayer_id, @RequestParam String ship, @RequestParam(value="locs[]") List<String> locs) {
+            @RequestParam String gamePlayer_id, @RequestParam String ship,
+            @RequestParam(value="locs[]") List<String> locs) {
         if (gamePlayer_id.isEmpty() || ship.isEmpty() || locs.isEmpty()) {
             System.out.println("Missing information in ship creation");
             return new ResponseEntity<>("Missing data", HttpStatus.FORBIDDEN);
         }
 
         Optional<GamePlayer> thegp = gprepo.findById(Long.parseLong(gamePlayer_id));
-        Ship ship2 = new Ship(ship,thegp.orElse(new GamePlayer()),locs);
+        Ship ship2 = new Ship(ship,thegp.orElse(new GamePlayer()),locs, 0);
         shrepo.save(ship2);
         return new ResponseEntity<>(ship2, HttpStatus.CREATED);
     }
 
+    //creating a salvo and also updating hits to ship
     @RequestMapping(path = "/api/salvoes", method=RequestMethod.POST)
     public ResponseEntity<Object> addSalvo(Authentication authentication,
             @RequestParam String gamePlayer_id, @RequestParam String turnNo,
             @RequestParam String loc, @RequestParam String gameId) {
+        //checking that user is logged in to be able to perform this post
         if (getUserLogged(authentication).isPresent()) {
             //find the proper gameplayer matching the id given
             Optional<GamePlayer> thegp = gprepo.findById(Long.parseLong(gamePlayer_id));
 
-            //**TO DO - this is where I would add an UPDATE to a ship to add 'hits' and determine if its sunk or not
-            //** problem is, how do we know if a shot is a hit or miss? this logic must be added in java//
+            //find the proper game matching this id given
             Game theGame = grepo.findById(Long.parseLong(gameId)).orElse(new Game());
 
             String hitMiss = "";
@@ -312,38 +357,197 @@ public class SalvoController {
             //Gameplayer set -> Array so that it can be indexed
             List<GamePlayer> mainList = new ArrayList<GamePlayer>();
             mainList.addAll(theGame.getGamePlayers());
+            //if the first gameplayer is you...
             if(mainList.get(0).getGameplayer_id() == Long.parseLong(gamePlayer_id)) {
-
-                //getting opponents ships
+//                System.out.println("here in player1");
+                //Ship set -> Array so that it can be indexed
                 List<Ship> oppShips = new ArrayList<>();
+                //..second player is not you. Collecting second players ships
                 oppShips.addAll(mainList.get(1).getShips());
                 for (int i=0; i<oppShips.size(); i++) {
-                   Long shipId = oppShips.get(i).getShip_id();
-                   for(int j=0; j<oppShips.get(i).getLocations().size(); j++) {
-                       if (loc == oppShips.get(i).getLocations().get(j)) {
+                    Long shipId = oppShips.get(i).getShip_id();
+                    for(int j=0; j<oppShips.get(i).getLocations().size(); j++) {
+                       //testing if the salvo matches any ship location for opponents ships, aka a hit
+//                        System.out.println(loc);
+//                        System.out.println(oppShips.get(i).getLocations().get(j));
+                       if (loc.equals(oppShips.get(i).getLocations().get(j))) {
+//                           System.out.println("here in hit");
                            hitMiss= "H";
-                           //** TO DO: add here to update the ship using shipId that you got above to add hit
+                           Ship shipHit = shrepo.findById(oppShips.get(i).getShip_id()).orElse(new Ship());
+                           shipHit.setHits(shipHit.getHits()+1);
+                           shrepo.save(shipHit);
                        }
                    }
                 }
+                //if there was no hit, must be a miss
                 if (hitMiss == "") {
+//                    System.out.println("here in miss");
                     hitMiss = "M";
                 }
-
+            //if the second gameplayer is you...
             } else if (mainList.get(1).getGameplayer_id() == Long.parseLong(gamePlayer_id)) {
-                //**TO DO: add the shit here, same as the if above this. Also test w some souts if this even works
-                mainList.get(0).getShips(); //THIS GET changed to UPDATE. perhaps get ship id here and update elsewhere?
+//                System.out.println("here in player2");
+                //Ship set -> Array so that it can be indexed
+                List<Ship> oppShips = new ArrayList<>();
+
+                //..second player is not you. Collecting second players ships
+                oppShips.addAll(mainList.get(0).getShips());
+                for (int i=0; i<oppShips.size(); i++) {
+                    Long shipId = oppShips.get(i).getShip_id();
+                    for(int j=0; j<oppShips.get(i).getLocations().size(); j++) {
+                        //testing if the salvo matches any ship location for opponents ships, aka a hit
+//                        System.out.println(loc);
+//                        System.out.println(oppShips.get(i).getLocations().get(j));
+                        if (loc.equals(oppShips.get(i).getLocations().get(j))) {
+//                            System.out.println("here in hit");
+                            hitMiss= "H";
+                            Ship shipHit = shrepo.findById(oppShips.get(i).getShip_id()).orElse(new Ship());
+                            shipHit.setHits(shipHit.getHits()+1);
+                            shrepo.save(shipHit);
+                        }
+                    }
+                }
+                //if there was no hit, must be a miss
+                if (hitMiss == "") {
+//                    System.out.println("here in miss");
+                    hitMiss = "M";
+                }
             }
 
-
-            //create the salvo
+            //after the opponents ship has been updated, create the salvo
             Salvo salvo2 = new Salvo(Integer.parseInt(turnNo), thegp.orElse(new GamePlayer()), loc, hitMiss);
             sarepo.save(salvo2);
-
             return new ResponseEntity<>(salvo2, HttpStatus.CREATED);
-            //alter ship
         } else {
             return new ResponseEntity<>("We're sorry, but you are not authorized to access this page. Please visit home and log in to see your games.", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    //retrieving how many ships have been sunk
+    @RequestMapping(path = "/api/shipSunk", method=RequestMethod.GET)
+    public ResponseEntity<Object> testSunkShips(
+            @RequestParam String game_id, @RequestParam String gp_id) {
+
+        //find the proper game matching this id given
+        Game theGame = grepo.findById(Long.parseLong(game_id)).orElse(new Game());
+        //Gameplayer set -> Array so that it can be indexed
+        List<GamePlayer> mainList = new ArrayList<GamePlayer>();
+        mainList.addAll(theGame.getGamePlayers());
+
+        int yourShipsSunk = 0;
+        int theirShipsSunk = 0;
+
+        //if the first gameplayer is you...
+        if (mainList.get(0).getGameplayer_id() == Long.parseLong(gp_id)) {
+            //Ship set -> Array so that it can be indexed
+            List<Ship> yourShips = new ArrayList<>();
+            yourShips.addAll(mainList.get(0).getShips());
+            for (Ship ship : yourShips) {
+                if (ship.getShipType() == "carrier" && ship.getHits() == 5) {
+                    yourShipsSunk += 1;
+                }
+                if ((ship.getShipType() == "cruiser" || ship.getShipType() == "battleship") && ship.getHits() == 3) {
+                    yourShipsSunk += 1;
+                }
+                if (ship.getShipType() == "destroyer" && ship.getHits() == 2) {
+                    yourShipsSunk += 1;
+                }
+            }
+            //opponents ships sunk
+            List<Ship> oppsShips = new ArrayList<>();
+            oppsShips.addAll(mainList.get(1).getShips());
+            for (Ship ship : oppsShips) {
+                if (ship.getShipType() == "carrier" && ship.getHits() == 5) {
+                    theirShipsSunk += 1;
+                }
+                if ((ship.getShipType() == "cruiser" || ship.getShipType() == "battleship") && ship.getHits() == 3) {
+                    theirShipsSunk += 1;
+                }
+                if (ship.getShipType() == "destroyer" && ship.getHits() == 2) {
+                    theirShipsSunk += 1;
+                }
+            }
+        } else if (mainList.get(1).getGameplayer_id() == Long.parseLong(gp_id)) {
+            //Ship set -> Array so that it can be indexed
+            List<Ship> yourShips = new ArrayList<>();
+            yourShips.addAll(mainList.get(1).getShips());
+            for (Ship ship : yourShips) {
+                if (ship.getShipType() == "carrier" && ship.getHits() == 5) {
+                    yourShipsSunk += 1;
+                }
+                if ((ship.getShipType() == "cruiser" || ship.getShipType() == "battleship") && ship.getHits() == 3) {
+                    yourShipsSunk += 1;
+                }
+                if (ship.getShipType() == "destroyer" && ship.getHits() == 2) {
+                    yourShipsSunk += 1;
+                }
+            }
+            //opponents ships sunk
+            List<Ship> oppsShips = new ArrayList<>();
+            oppsShips.addAll(mainList.get(0).getShips());
+            for (Ship ship : oppsShips) {
+                if (ship.getShipType() == "carrier" && ship.getHits() == 5) {
+                    theirShipsSunk += 1;
+                }
+                if ((ship.getShipType() == "cruiser" || ship.getShipType() == "battleship") && ship.getHits() == 3) {
+                    theirShipsSunk += 1;
+                }
+                if (ship.getShipType() == "destroyer" && ship.getHits() == 2) {
+                    theirShipsSunk += 1;
+                }
+            }
+        }
+        int intArray[] = new int[2];
+        intArray[0] = yourShipsSunk;
+        intArray[1] = theirShipsSunk;
+        return new ResponseEntity<>(intArray ,HttpStatus.ACCEPTED);
+    }
+
+    //creating a new score once a game has finished
+    @RequestMapping(path="/api/scores", method=RequestMethod.POST)
+    public ResponseEntity<Object> updateScores(
+            @RequestParam String game_id, @RequestParam String gp_id, @RequestParam String winner) {
+        //find the proper game matching this id given
+        Game theGame = grepo.findById(Long.parseLong(game_id)).orElse(new Game());
+        //Gameplayer set -> Array so that it can be indexed
+        List<GamePlayer> mainList = new ArrayList<GamePlayer>();
+        mainList.addAll(theGame.getGamePlayers());
+        Long oppId = null;
+        Score score1 = null;
+        Score score2 = null;
+
+        if(gprepo.findById(Long.parseLong(gp_id)).orElse(new GamePlayer()).getScore()== null) {
+            System.out.println("here, score is null for sure");
+            if (mainList.get(0).getGameplayer_id() == Long.parseLong(gp_id)) {
+                oppId = mainList.get(1).getGameplayer_id();
+            } else if (mainList.get(1).getGameplayer_id() == Long.parseLong(gp_id)) {
+                oppId = mainList.get(0).getGameplayer_id();
+            }
+            System.out.println(oppId);
+            System.out.println(winner);
+            System.out.println(game_id);
+            System.out.println(gp_id);
+            if (winner.equals("you")) {
+                score1 = new Score(1.0, gprepo.findById(Long.parseLong(gp_id)).orElse(new GamePlayer()));
+                score2 = new Score(0.0, gprepo.findById(oppId).orElse(new GamePlayer()));
+                System.out.println("here1");
+            } else if (winner.equals("them")) {
+                score1 = new Score(1.0, gprepo.findById(oppId).orElse(new GamePlayer()));
+                score2 = new Score(0.0, gprepo.findById(Long.parseLong(gp_id)).orElse(new GamePlayer()));
+                System.out.println("here2");
+            } else if (winner.equals("tie")) {
+                score1 = new Score(0.5, gprepo.findById(oppId).orElse(new GamePlayer()));
+                score2 = new Score(0.5, gprepo.findById(Long.parseLong(gp_id)).orElse(new GamePlayer()));
+                System.out.println("here3");
+            } else {
+                System.out.println("nothing equal");
+            }
+            screpo.save(score1);
+            screpo.save(score2);
+            return new ResponseEntity<>("score created", HttpStatus.CREATED);
+        } else {
+            System.out.println("here, score is not null");
+            return new ResponseEntity<>("this game already has a score, score not creaed", HttpStatus.FORBIDDEN);
         }
     }
 

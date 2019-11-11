@@ -74,39 +74,51 @@ public class SalvoApplication {
 	List<String> carrierlocs1 = Arrays.asList("5-7", "6-7", "7-7", "8-7", "9-7");
 
 	//creating ships for GP1
-	Ship ship1 = new Ship("cruiser", gamePlayer1, cruiserlocs);
-	Ship ship2 = new Ship("battleship", gamePlayer1, battleshiplocs);
-	Ship ship3 = new Ship("destroyer", gamePlayer1, destroyerlocs);
-	Ship ship4 = new Ship("carrier", gamePlayer1, carrierlocs);
+	Ship ship1 = new Ship("cruiser", gamePlayer1, cruiserlocs, 3);
+	Ship ship2 = new Ship("battleship", gamePlayer1, battleshiplocs, 0);
+	Ship ship3 = new Ship("destroyer", gamePlayer1, destroyerlocs, 2);
+	Ship ship4 = new Ship("carrier", gamePlayer1, carrierlocs, 5);
 
 	//creating ships for GP2
-	Ship ship5 = new Ship("cruiser", gamePlayer2, cruiserlocs1);
-	Ship ship6 = new Ship("battleship", gamePlayer2, battleshiplocs1);
-	Ship ship7 = new Ship("destroyer", gamePlayer2, destroyerlocs1);
-	Ship ship8 = new Ship("carrier", gamePlayer2, carrierlocs1);
+	Ship ship5 = new Ship("cruiser", gamePlayer2, cruiserlocs1, 3);
+	Ship ship6 = new Ship("battleship", gamePlayer2, battleshiplocs1, 3);
+	Ship ship7 = new Ship("destroyer", gamePlayer2, destroyerlocs1, 0);
+	Ship ship8 = new Ship("carrier", gamePlayer2, carrierlocs1, 0);
 
 	//creating ships for GP3
-	Ship ship9 = new Ship("cruiser", gamePlayer3, cruiserlocs);
-	Ship ship10 = new Ship("battleship", gamePlayer3, battleshiplocs);
-	Ship ship11 = new Ship("destroyer", gamePlayer3, destroyerlocs);
-	Ship ship12 = new Ship("carrier", gamePlayer3, carrierlocs);
+	Ship ship9 = new Ship("cruiser", gamePlayer3, cruiserlocs, 0);
+	Ship ship10 = new Ship("battleship", gamePlayer3, battleshiplocs, 0);
+	Ship ship11 = new Ship("destroyer", gamePlayer3, destroyerlocs, 0);
+	Ship ship12 = new Ship("carrier", gamePlayer3, carrierlocs, 0);
 
 	//creating ships for GP4
-	Ship ship13 = new Ship("cruiser", gamePlayer4, cruiserlocs1);
-	Ship ship14 = new Ship("battleship", gamePlayer4, battleshiplocs1);
-	Ship ship15 = new Ship("destroyer", gamePlayer4, destroyerlocs1);
-	Ship ship16 = new Ship("carrier", gamePlayer4, carrierlocs1);
+	Ship ship13 = new Ship("cruiser", gamePlayer4, cruiserlocs1, 0);
+	Ship ship14 = new Ship("battleship", gamePlayer4, battleshiplocs1, 0);
+	Ship ship15 = new Ship("destroyer", gamePlayer4, destroyerlocs1, 0);
+	Ship ship16 = new Ship("carrier", gamePlayer4, carrierlocs1, 4);
 
 	//creating salvos for GP1-4
-	Salvo salvo1 = new Salvo(1, gamePlayer1, "A1", "M");
-	Salvo salvo2 = new Salvo(1, gamePlayer1, "D4", "M");
-	Salvo salvo3 = new Salvo(1, gamePlayer2, "H4","H" );
-	Salvo salvo4 = new Salvo(1, gamePlayer2, "H8", "M");
-
+	Salvo salvo1 = new Salvo(1, gamePlayer1, "0-0", "M");
+	Salvo salvo2 = new Salvo(2, gamePlayer1, "3-3", "M");
+	Salvo salvo3 = new Salvo(3, gamePlayer2, "7-3","H" );
+	Salvo salvo4 = new Salvo(4, gamePlayer2, "7-2", "H");
+	Salvo salvo5 = new Salvo(1, gamePlayer2, "7-4", "H");
+	Salvo salvo6 = new Salvo(2, gamePlayer2, "6-8", "H");
+	Salvo salvo7 = new Salvo(3, gamePlayer2, "6-9","H" );
+	Salvo salvo8 = new Salvo(4, gamePlayer2, "6-7", "H");
+	Salvo salvo9 = new Salvo(2, gamePlayer2, "5-7", "H");
+	Salvo salvo10 = new Salvo(3, gamePlayer2, "4-7","H" );
+	Salvo salvo11 = new Salvo(4, gamePlayer2, "3-7", "H");
+	Salvo salvo19 = new Salvo(4, gamePlayer2, "2-7", "H");
+	Salvo salvo12 = new Salvo(1, gamePlayer1, "0-5", "H");
+	Salvo salvo13 = new Salvo(2, gamePlayer1, "1-5", "H");
+	Salvo salvo14 = new Salvo(3, gamePlayer1, "2-5","H" );
+	Salvo salvo15 = new Salvo(4, gamePlayer1, "2-4", "H");
+	Salvo salvo16 = new Salvo(2, gamePlayer1, "2-3", "H");
+	Salvo salvo17 = new Salvo(3, gamePlayer1, "2-2","H" );
+	Salvo salvo18 = new Salvo(4, gamePlayer1, "2-1", "M");
 
 	//creating scores for games
-	Score score1 = new Score(1.0, gamePlayer1);
-	Score score2 = new Score(0.0, gamePlayer2);
 	Score score3 = new Score(0.5, gamePlayer3);
 	Score score4 = new Score(0.5, gamePlayer4);
 
@@ -149,9 +161,22 @@ public class SalvoApplication {
 			salvoRespository.save(salvo2);
 			salvoRespository.save(salvo3);
 			salvoRespository.save(salvo4);
+			salvoRespository.save(salvo5);
+			salvoRespository.save(salvo6);
+			salvoRespository.save(salvo7);
+			salvoRespository.save(salvo8);
+			salvoRespository.save(salvo9);
+			salvoRespository.save(salvo10);
+			salvoRespository.save(salvo11);
+			salvoRespository.save(salvo12);
+			salvoRespository.save(salvo13);
+			salvoRespository.save(salvo14);
+			salvoRespository.save(salvo15);
+			salvoRespository.save(salvo16);
+			salvoRespository.save(salvo17);
+			salvoRespository.save(salvo18);
+			salvoRespository.save(salvo19);
 
-			scoreRepository.save(score1);
-			scoreRepository.save(score2);
 			scoreRepository.save(score3);
 			scoreRepository.save(score4);
 		};

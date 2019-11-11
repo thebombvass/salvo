@@ -134,9 +134,10 @@ let theCurrentUser = ""
     function loadGameData() {
         $.get("/api/games")
         .done(function(data) {
-            data.forEach((game) => {
-                console.log(game)
-            })
+        //disabled unless debugging
+//            data.forEach((game) => {
+//                console.log(game)
+//            })
         //looping through the data to fill the table
         fillInGamesBoard(data)
         })

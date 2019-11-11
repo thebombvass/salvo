@@ -45,10 +45,17 @@
         </div>
     </div>
 
+    <div id="yourTurn" class="container-fluid text-light">
+        <p>Your turn! Take your shot</p>
+        <p id="yourSelection"></p>
+        <button id="sendSalvoBtn" class="btn btn-danger" disabled>Post Salvo</button>
+    </div>
+
     <div class="container-fluid">
     <div class="row">
         <div class="col-lg">
             <p class="text-center text-light">Your Ships</p>
+            <p id="yourShipsSunk" class="text-center text-light"></p>
             <table id="yourBoard" class="table table-bordered table-hover table-primary text-center">
                 <!-- The battleship table should be injected here via jquery -->
             </table>
@@ -56,6 +63,7 @@
 
         <div class="col-lg">
             <p class="text-center text-light">Your Shots</p>
+            <p id="theirShipsSunk" class="text-center text-light"></p>
             <table id="opponentBoard" class="table table-bordered table-primary text-center">
                 <!-- The battleship table should be injected here via jquery -->
             </table>

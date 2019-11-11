@@ -15,7 +15,13 @@ $(function() {
     let pageContext
     let pageQuery
     let player1 = ""
+    let player2 = ""
     let gp_id
+    let roundNo = 0;
+    let salvoRowSelected;
+    let salvoColSelected;
+    let yourShipsSunk = 0;
+    let theirShipsSunk = 0;
 
 
     //Dummy variables for the locations of each individual ship. Used to hold their location during the 'ship build'
@@ -53,15 +59,22 @@ $(function() {
 
     //Creates the blank HTML table for your board and your opponents board
     function createBoards() {
-    let rowsHtml = `<td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td>`
+        let rowsHtml = `<td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td>`
         let tableLabel = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
         //for loop for inside the <tbody>//
         let innerTbody = ""
         for(i=1; i<11; i++) {
             innerTbody += ("<tr><th scope='row'>"+ i +"</th>" + rowsHtml + "</tr>")
         }
-
         $('#yourBoard').html(`${tableLabel} <tbody> ${innerTbody} </tbody>`)
+
+        rowsHtml = "<td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>"
+        tableLabel = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
+        //for loop for inside the <tbody>//
+        innerTbody = ""
+        for(i=1; i<11; i++) {
+            innerTbody += ("<tr><th scope='row'>"+ i +"</th>" + rowsHtml + "</tr>")
+        }
         $('#opponentBoard').html(`${tableLabel} <tbody> ${innerTbody} </tbody>`)
     }
 
@@ -121,6 +134,7 @@ $(function() {
         }
     }
 
+    //adds Drag event listeners to the ships
     function addDragListeners() {
         //add dragstart and dragend listeners meaning when you drag what happens
         if (shipsToShow.includes("carrierDummy")) {
@@ -200,6 +214,10 @@ $(function() {
         addDropListeners()
     }
 
+    //this doesn't actually add any event listeners. It adds data attributes to the td cells which
+    //determine which ships are allowed to be placed there. First clears all data attributes, then adds
+    //them back, so long as they don't conflict with a ship already placed.
+    //triggered by add DragListeners and upstream, fillBox
     function addDropListeners() {
         let rows = $("#yourBoard").find("tbody tr")
         let cols = $("#yourBoard").find("tbody tr").eq(0).find("td")
@@ -300,11 +318,6 @@ $(function() {
                         if(e.target.getAttribute(dtag) == currentDraggedItem[0].dataset.ship) {
                             console.log('dropped')
                             dropToDummyProcessor(currentDraggedItem[0].getAttribute('id'), e.target.classList[0])
-                        } else {
-                            console.log("no")
-                            //add here what to do with an illegal drop - there has to be a better way to do this than multiple ifs
-                            // at the moment can do with a varible set in if(ship==box) and then an outside if to see if
-                            // the ship was ever dropped properly or not
                         }
                     }
                 });
@@ -312,6 +325,8 @@ $(function() {
         }
     }
 
+    //called by dropEventHandler on a drop event. converts the cell clicked and the ship being dragged
+    //into a placed ship. Uses illegalPlacementNotice and blockingCellswithShip
     function dropToDummyProcessor(ship, starterCell) {
     //down first then over
         let shipLength
@@ -435,7 +450,7 @@ $(function() {
         }
     }
 
-    //function that ensures the ship placement is legal
+    //function that ensures the ship placement in not the starter cell is not conflicting with another ship
     function illegalPlacementNotice(dummyArray) {
         for (i=0;i<dummyArray.length;i++) {
             if(occupiedBoxArray.includes(dummyArray[i])) {
@@ -446,6 +461,7 @@ $(function() {
         } return true
     }
 
+    //remove data attributes from td cells that contain full ship
     function blockingCellsWithShip(dummyArray) {
         for (i=0;i<dummyArray.length; i++) {
             //..add the locations to occupiedBoxArray..
@@ -460,6 +476,7 @@ $(function() {
         }
     }
 
+    //removes the image that is the ship from td cells where the ship was
     function removeShip(ship) {
         //for carrier
         if (ship == 'carrier') {
@@ -552,6 +569,7 @@ $(function() {
         }
     }
 
+    //adds the data attributes back to cells where a ship used to be that was removed
     function addDropListenersBack(loc) {
         row = parseInt(loc[0])
         col = parseInt(loc[2])
@@ -586,7 +604,7 @@ $(function() {
         //****functions in 'TURNS' phase****//
 
 
-    //!!!!TO DO !!! this function needs a lot of help to work later with ships already placed and vertical ships
+    //creates a ship
     function createShip(dummyArray, ship, horzVertz) {
         if(horzVertz == 'V') {
             if(ship == 'carrier' || ship == 'battleship') {
@@ -595,7 +613,6 @@ $(function() {
                 }
             }
         }
-        console.log(dummyArray)
         //fill in ship tail - this belongs in starter-cell since their backwards
         let row = parseInt(dummyArray[0][0])
         let col = parseInt(dummyArray[0][2])
@@ -604,7 +621,6 @@ $(function() {
         //fill in ship head
         row = parseInt(dummyArray[dummyArray.length-1][0])
         col = parseInt(dummyArray[dummyArray.length-1][2])
-        console.log('head'+ col + " "+row)
         purl = "/"+ship+"Head"+horzVertz+".png"
         $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${purl})`, "background-size": "cover"});
         //fill in ship middle
@@ -618,29 +634,24 @@ $(function() {
 
     //adds a bomb image to specific cells on the players' board based on 'hitMiss', which is set in the db during a turn
     //used later on in setUpGrid
-    function createSalvo(row, col, hitMiss, board) {
+    function createSalvo(Srow, Scol, hitMiss, board) {
+        let row = parseInt(Srow)
+        let col = parseInt(Scol)
         //if its your board
         if (board == 1) {
             if (hitMiss == "H") {
-                $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
             } else if (hitMiss == "M") {
-                $("#yourBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
+                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
             }
         //if its not your board
         } else if (board == 2) {
             if (hitMiss == "H") {
-                $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
+                $("#opponentBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url("/boatExplode.png")`, "background-size": "cover"});
             } else if (hitMiss == "M") {
-                $("#opponentBoard").find("tbody tr").eq(row-1).children().eq(col).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
+                $("#opponentBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url("/waterExplode.png")`, "background-size": "cover"});
             }
         }
-    }
-
-    //changing the letters for columns into numbers to make it easier for DOM manipulation when trying to get a specific <td>
-    //that corresponds to a cell
-    function parseColumns(col) {
-        let newObj = {A:1, B:2, C:3, D:4 ,E:5, F:6, G:7, H:8, I:9, J:10}
-        return newObj[col]
     }
 
     //setting up initial ships and salvoes. Accepts following parameters:
@@ -650,97 +661,75 @@ $(function() {
     //called inside the ajax call to create the entire 2 boards with ships and slavoes that are already present
     //this should only be called during the 'turns' mode
     function setUpGrid(array, shipSalvo, board) {
-        console.log(array)
         let initialLocations = []
         if (shipSalvo == "ship") {
             for (let i=0; i < array.length; i++) {
-                console.log(array[i].shipType)
-                console.log(array[i].locations)
                 arr = array[i]
                 if(arr.locations[0][0] !== arr.locations[1][0]) {
-                    console.log('vertical')
                     createShip(array[i].locations, array[i].shipType, "V")
                 } else {
-                    console.log('horizontal')
                     createShip(array[i].locations, array[i].shipType, "H")
                 }
             }
         }
 
         if (shipSalvo == "salvo") {
-            for (let i=0; i < array.length; i++) {
-                let salvo = array[i]
-                let theCol = parseColumns(salvo.location[0])
-                let theRow = salvo.location.slice(1)
-                let hitMiss = salvo.hitMiss
-                initialLocations.push({theRow: theRow, theCol: theCol, hitMiss: hitMiss})
-            }
-            for (let i=0; i < initialLocations.length; i++) {
-                param1 = initialLocations[i].theRow
-                param2 = initialLocations[i].theCol
-                param3 = initialLocations[i].hitMiss
-                createSalvo(param1, param2, param3, board)
+            console.log(array)
+            console.log(shipSalvo)
+            for(let i=0; i < array.length; i++) {
+                row = array[i].location[0]
+                col = array[i].location[2]
+                hitMiss = array[i].hitMiss
+                //create each salvo
+                createSalvo(row, col, hitMiss, board)
             }
         }
     }
 
-    //AJAX CALLs AND PHASE LOGIC
-
-    //the main ajax call to get game information specific to the user logged in
-    function loadGameInfo(pageContext, pageQuery) {
-        $.ajax({
-            type: 'GET',
-            url: `http://${pageContext}/api/game_view/${pageQuery}`,
-            success: function(data) {
-            console.log(data)
-                //dynamically add data relevant to this game
-                let date = data.date
-                player1 = data.username1;
-                let shipsPlayer1 = data.ships1;
-                let salvoesPlayer1 = data.salvoes1;
-                let player2 =""
-
-                //**condition met to enter build phase**
-                if (shipsPlayer1 == "") {
-                    console.log("Enter Build Phase")
-                    $('#boxShipsToBuildContainer').show()
-                    getGamePlayer();
-                    fillShipsToBuildBox();
-                    dropEventHandler();
-
-                //**condition met to enter turns phase**
-                } else {
-                    setUpGrid(shipsPlayer1, "ship", 1); //1 - 1
-                    setUpGrid(salvoesPlayer1, "salvo", 2)//1 - 2
-
-                    //if there is no second player
-                    if (data.username2 == null) {
-                        player2 = "[Waiting for another player to join...]"
-                    //if there is a second player
-                    } else {
-                    //**** TO DO - need to add logic for if it is your turn or not (count # of turns) *****//
-                    //** perhaps both people can take a turn at the same time? i.e. if your ships are placed you can go
-                    //** upon ship placement see if someone else has placed ships. Then see if there has been a strike. then allow a strike?
-                    //** actually idk. I think turns need to go {1, gp1} {2, gp2} not {1, gp1} {1, gp2}. like by id
-                        player2 = data.username2;
-                        let salvoesPlayer2 = data.salvoes2;
-                        setUpGrid(salvoesPlayer2, "salvo", 1); //2-1
-                    }
-                $('#playersDescription').text(`This game started at ${date} is between ${player1} (you) and ${player2}`)
-                }
-            },
-            statusCode: {
-                403: function() {
-                    console.log("403")
-                    $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but you do not have access to this page. Please return home and log in to see your games'</h2>`)
-                },
-                500: function() {
-                    console.log("500")
-                    $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but we don't recognize this URL. Please return home and log in to see your games</h2>`)
-                }
-            }
-        });
+    function whosTurnIsIt(salvoesPlayer1, salvoesPlayer2) {
+        if (salvoesPlayer1.length > salvoesPlayer2.length) {
+            console.log('returning zero')
+            return 0
+        } else {
+            console.log('returning one')
+            return 1
+        }
     }
+
+    function addSalvoListeners() {
+        let rows = $("#yourBoard").find("tbody tr")
+        let cols = $("#yourBoard").find("tbody tr").eq(0).find("td")
+
+        for (var i=0; i<rows.length; i++) {
+            for (var j=0; j <cols.length; j++) {
+                $("#opponentBoard").find("tbody tr").eq(i+0).children().eq(j+1).addClass(i+'-'+j)
+            }
+        }
+
+        for (var i=0; i<rows.length; i++) {
+            for (var j=0; j <cols.length; j++) {
+                let box = $("#opponentBoard").find("tbody tr").eq(i+0).children().eq(j+1)
+                if(box.css('background-image') == 'none') {
+                    $("#opponentBoard").find("tbody tr").eq(i+0).children().eq(j+1).on('click', function(e) {
+                        prevRow = parseInt(salvoRowSelected)
+                        prevCol = parseInt(salvoColSelected)
+                        console.log($("#opponentBoard").find("tbody tr").eq(prevRow).children().eq(prevCol+1))
+                        $("#opponentBoard").find("tbody tr").eq(prevRow).children().eq(prevCol+1).removeClass('bg-danger')
+                        salvoRowSelected = e.target.classList[0][0]
+                        salvoColSelected = e.target.classList[0][2]
+                        $("#yourSelection").text(`You have selected to strike row: ${salvoRowSelected} col: ${salvoColSelected}`)
+                        $("#sendSalvoBtn").prop('disabled', false)
+                        e.target.classList.add('bg-danger')
+                    });
+                } else {
+                }
+
+            }
+        }
+    }
+
+    //****AJAX CALLs AND PHASE LOGIC*****
+
 
     //ajax post of ship data upon ship placement
     function postAShip(shipList) {
@@ -771,6 +760,7 @@ $(function() {
                 if (game_id == pageQuery && player_id == player1) {
                     console.log(true)
                     gp_id = data[i].id
+                    shipsSunk(gp_id);
                 } else {
                     console.log(false)
 
@@ -779,24 +769,13 @@ $(function() {
         })
     }
 
-    //function to send a salvo
-    //****** TO DO - perhaps to tell when a ship is sunk add a 'hits' category to each shiip
-    // which is not shown unless it reaches a certain number (i.e. if ship.hits == 3 200 else 403).
-    // this would need to be a separate controller from ships just also using ships (like games and game_view)
-
-    //**** TO DO - change the way salvoes are. Should be same '0-0' format
-    //** add a method checking each turn (when you add turn logic) if a ship is sunk. this should also
-    // later check for a win or loss aka game is completed
-
-    //***** TO DO - i noticed that join game is broken. 1) can add more than 2 players, 2) doesn't take you to the game
-
-    //to dos for laterrrrr - add to notes
-    //***** TO DO - add security to all /api/blah blah/ so that you can only see if you are an admin
-    //***** TO DO - enhance graphics like a lot. Maybe look into some js libraries that do that. Maybe actually use css. Also enhance logical page flow
-
-    function postASalvo(loc, gp_id, ) {
+    //send a salvo to the db
+    function postASalvo(loc, gp_id, turnNo) {
+        console.log("gp_id is "+ gp_id)
+        console.log("loc is "+ loc)
+        console.log("turnNo is "+ turnNo)
+        console.log("gameId is "+ pageQuery)
         $.post("/api/salvoes",
-            //TO DO : figure out how to add all this shit here. Particularly turnNo needs logic
             {gamePlayer_id: gp_id,
             loc: loc,
             turnNo: turnNo,
@@ -808,7 +787,133 @@ $(function() {
         .fail(function() {
             console.log("failure")
         });
-//      location.reload();
+      location.reload();
+    }
+
+    //check how many ships are sunk for each  player
+    function shipsSunk(gp_id) {
+        //how many of your ships are sunk
+        $.get(path="/api/shipSunk",
+            {game_id: pageQuery,
+            gp_id: gp_id})
+        .done(function(data){
+            console.log(data)
+            console.log("success")
+            yourShipsSunk = data[0]
+            theirShipsSunk = data[1]
+            $("#yourShipsSunk").text(`${yourShipsSunk} of your ships have been sunk by ${player2}`)
+            $("#theirShipsSunk").text(`You have sunk ${theirShipsSunk} of ${player2}'s ships'`)
+            if(yourShipsSunk==4 || theirShipsSunk==4) {
+                let winner;
+                console.log('GAME OVA BITCH')
+                if(yourShipsSunk==4) {
+                    winner = "them"
+                } else {
+                    winner= "you"
+                }
+                gameIsOver(pageQuery, gp_id, winner)
+            }
+        })
+        .fail(function() {
+            console.log("failure")
+        });
+    }
+
+    function gameIsOver(game_id, gp_id, winner) {
+        $.post(path="/api/scores",
+            {game_id: game_id,
+            gp_id: gp_id,
+            winner: winner
+            })
+        .done(function(data) {
+            console.log(data)
+            console.log('success')
+        })
+        .fail(function() {
+            console.log('fail')
+        })
+
+    }
+
+    //the main ajax call to get game information specific to the user logged in
+    function loadGameInfo(pageContext, pageQuery) {
+        $.ajax({
+            type: 'GET',
+            url: `http://${pageContext}/api/game_view/${pageQuery}`,
+            success: function(data) {
+            console.log(data)
+                //dynamically add data relevant to this game
+                let date = data.date
+                player1 = data.username1;
+                let shipsPlayer1 = data.ships1;
+                let salvoesPlayer1 = data.salvoes1;
+                let player2
+                if (data.username2 == null) {
+                    player2 = "[Waiting for another player to join...]"
+                } else {
+                    player2 = data.username2;
+                }
+                //retrieve gamePlayer_id
+                getGamePlayer();
+
+                //**condition met to enter build phase**
+                if (shipsPlayer1 == "") {
+                    console.log("Enter Build Phase")
+                    //ability to see ships to place
+                    $('#boxShipsToBuildContainer').show()
+                    //fill ships to place box with available ships
+                    //this function triggers adding drag listeners
+                    fillShipsToBuildBox();
+                    //add drop listeners
+                    dropEventHandler();
+
+                //**condition met to enter turns phase**
+                } else {
+                    console.log("Enter Turns Phase")
+
+                    setUpGrid(shipsPlayer1, "ship", 1); //player1 ships
+                    setUpGrid(salvoesPlayer1, "salvo", 2) //player1 salvoes (on p2 ships)
+
+                    //if there is no second player
+                    if (data.username2 == null) {
+
+                    //if there is a second player
+                    } else {
+                        //if second player has placed his ships, you are officially in the turns phase
+                        if (data.shipsExist) {
+                            //first add salvoes already played
+                            let salvoesPlayer2 = data.salvoes2;
+                            setUpGrid(salvoesPlayer2, "salvo", 1); //opponents salvoes on your board
+                            //set appropriate roundNo
+                            roundNo = Math.min(salvoesPlayer1.length, salvoesPlayer2.length)+1
+                            //Within Turns Phase, its your turn
+                            if(whosTurnIsIt(salvoesPlayer1, salvoesPlayer2) == 1) {
+                                $("#yourTurn").show()
+                                addSalvoListeners();
+                                $("#sendSalvoBtn").click(function() {postASalvo(salvoRowSelected+"-"+salvoColSelected, gp_id, roundNo)})
+                            //Within Turns Phase, its not your turn. time to wait
+                            } else {
+                                console.log(`Waiting for ${player2} to take his shot for this round. Refresh page to see if they have`)
+                            }
+                        //if second player has not placed his ships, you chill
+                        } else {
+                            console.log(`Waiting for ${player2} to place his ships. Refresh page to see if they have`)
+                        }
+                    }
+                }
+                $('#playersDescription').text(`This game started at ${date} is between ${player1} (you) and ${player2}. Round: ${roundNo}`)
+            },
+            statusCode: {
+                403: function() {
+                    console.log("403")
+                    $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but you do not have access to this page. Please return home and log in to see your games'</h2>`)
+                },
+                500: function() {
+                    console.log("500")
+                    $('#gameFieldView').html(`<h2 class="text-center text-danger">ERROR: We're sorry but we don't recognize this URL. Please return home and log in to see your games</h2>`)
+                }
+            }
+        });
     }
 
     //*****************Function Calls *******************
@@ -817,6 +922,7 @@ $(function() {
     $('#horizontalRad').click(function() {horzVertz="H"; fillShipsToBuildBox()})
     $('#verticalRad').click(function() {horzVertz="V"; fillShipsToBuildBox()})
     $('#boxShipsToBuildContainer').hide()
+    $('#yourTurn').hide()
     $('#saveBtn').click(function() {postAShip(shipsDummy)})
 
     //display your boards on the page
@@ -832,3 +938,5 @@ $(function() {
 });
 
 
+//add-
+//  -can only add one red at a time
