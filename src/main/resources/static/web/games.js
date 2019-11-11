@@ -160,6 +160,7 @@ let theCurrentUser = ""
             console.log("Failure")
             alert("Failed to log in. Please ensure your username and password are correct. If you are new, please use the registration form to register as a new user.")});
     }
+
     //Logging out
     function logout(evt) {
         evt.preventDefault();
@@ -215,6 +216,7 @@ let theCurrentUser = ""
         .done(function(data) {
             console.log(data)
             console.log("success")
+            location.replace(window.location.href.replace(window.location.pathname, "/web/game.html?gp="+gameNum))
         })
         .fail(function() {
             console.log("failure")
@@ -282,8 +284,8 @@ let theCurrentUser = ""
     $('#new-game-btn').click(wrapperFunctionNewGame)
 
     //listener for 'join game' button click to trigger adding another player to a game
-    $("#gamesBoardGuts").ready ( function () {
-        $('#gamesBoardGuts').on ("click", ".join-game-btn", function () {
+    $("#gamesBoardGuts").ready( function () {
+        $('#gamesBoardGuts').on("click", ".join-game-btn", function () {
             wrapperFunctionJoinGame()
         });
     });
