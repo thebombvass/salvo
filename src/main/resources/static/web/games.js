@@ -4,6 +4,29 @@
 
 $(function() {
 
+if(window.location.pathname == "/web/splash.html") {
+    $("#playNowSlideLeft").click(function() {plusDivs(-1)});
+    $("#playNowSlideRight").click(function() {plusDivs(+1)});
+
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function plusDivs(n) {
+      showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+      var i;
+      var x = $(".playNowSlides");
+      if (n > x.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = x.length} ;
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+      }
+      x[slideIndex-1].style.display = "block";
+    }
+}
+
 //globally defining the variable for if someone is logged in or not
 let theCurrentUser = ""
 
@@ -155,6 +178,8 @@ let theCurrentUser = ""
         .done(function() {
             console.log("success")
             alert("Logged in!")
+            //redirect on log in
+            location.replace(window.location.href.replace(window.location.pathname, "/web/games.html"))
             isAuthenticated()})
         .fail(function() {
             console.log("Failure")

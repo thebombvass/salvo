@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/web/styles.css">
+</head>
+
+<body class="bg-dark">
+
+<div class="parallax1 text-center">
+    <div id="splashTitleContainer" class="d-flex flex-column align-items-center justify-content-center">
+        <h1 class="splashTitle">BATTLESHIP</h1>
+
+        <div id="splashTitleCaretContainer">
+            <p id="splashTitleCaretTop" class="splashTitleCaret">⌄</p>
+            <p id="splashTitleCaretBottom" class="splashTitleCaret">⌄</p>
+        </div>
+    </div>
+</div>
+
+<div id="gameDescriptionContainer">
+    <div id="gameDescription" class="container-fluid text-center">
+        <h2 class="text-light">Ah, the Thrill of Naval Combat</h2>
+        <br>
+        <p class="text-light">A streaking torpedo misses the hull of your stealth submarine by no more than fifty feet. The crew breathes a sigh of relief. Now it’s your turn to send a message to the enemy fleet, only the problem is that you don’t know their exact location. Welcome to the battleship game category, where each decision can save lives – or take them away. Your fleet has strayed into enemy waters, and negotiations have failed. The enemy considers it an act of war, so they fire upon your position! You’ve only got a few battleships (and a particularly brave rowboat, for some reason), so take them out before they take you out.</p>
+    </div>
+</div>
+
+<div class="parallax2">
+</div>
+
+<div id="playNowContainer" class="text-light">
+    <h1>PLAY NOW</h1>
+    <p>Please sign in below to play. If you are new, please register as a new user before signing in.</p>
+    <div id="playNow" class="container-fluid text-light">
+        <div id="signInContainer" class="playNowSlides">
+            <h3>SIGN IN</h3>
+            <form id="login-form" onsubmit="return false">
+                <div class="form-group">
+                    <label for="username">Email address</label>
+                    <input type="text" class="form-control" id="username" name="username" aria-describedby="emailHelp" placeholder="Enter email">
+                    <!--                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="text" class="form-control" name="password" id="password" placeholder="Password">
+                </div>
+                <div class="d-flex justify-content-end">
+                <button type="submit" id="submit-login-form" class="btn playNowSubmitButtons">Log In</button>
+                </div>
+            </form>
+            <div class="d-flex justify-content-end">
+            <button id="playNowSlideLeft" class="playNowSlideButtons"> Register Here &#10095;</button>
+            </div>
+        </div>
+
+        <div id="registerContainer" class="playNowSlides">
+            <h3>REGISTER</h3>
+            <form id="register-form" onsubmit="return false">
+                <div class="form-group">
+                    <label for="regUsername">Email address</label>
+                    <input type="text" class="form-control" id="regUsername" name="regUsername" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">Must be a unique email address</small>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="text" class="form-control" id="regPassword" name="regPassword" aria-describedby="passwordHelp" placeholder="Password">
+                    <small id="passwordHelp" class="form-text text-muted">Must be at least 8 characters long</small>
+                </div>
+                <div class="d-flex justify-content-end">
+                <button type="submit" class="btn playNowSubmitButtons">Register</button>
+                </div>
+            </form>
+            <div class="d-flex justify-content-end">
+            <button id="playNowSlideRight" class="playNowSlideButtons">&#10094; Return to Sign In</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<!--    Jquery-->
+<script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+<!--    Bootstrap-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--    My JS-->
+<script src="games.js"></script>
+</body>
+</html>
