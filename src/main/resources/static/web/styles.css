@@ -4,6 +4,11 @@
     sea blue: #234a4a;
 */
 
+/*All Documents*/
+body {
+    width: 100%;
+}
+
 
 /*First Pic Splash Page*/
 
@@ -133,9 +138,106 @@ playNow h3 {
 
 /*Header Games Page*/
 #gamesHeader {
-    border: 2px solid red
-    background-image: url("https://i.imgur.com/pApp9HT.png")
+    padding-top: 10%;
+    background-image: url("https://i.imgur.com/pApp9HT.png");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+#gamesHeader h1 {
+    position: relative;
+    bottom: 40px;
+}
+
+#gamesHeader p {
+    color: black;
+    position: relative;
+    bottom: 100px;
+}
+
+.nav-item a {
+    color: #e0e0e0;
+}
+
+#authedUserHeader {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+.parallax3 {
+    background-image: url("https://i.imgur.com/hhyJ64D.jpg");
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    height: 600px;
+}
+
+#gamesBoardContainer {
+    padding-top: 10%;
+    padding-bottom: 10%;
+    padding-right: 5%;
+    padding-left: 5%;
+    background-color: #292b29;
+}
+
+#leaderBoardContainer {
+    padding-top: 20%;
+    padding-bottom: 10%;
+    padding-right: 5%;
+    padding-left: 5%;
+    background-color: #292b29;
+}
+
+#gamesBoardContainer table {
+    border-left: #234a4a solid 5px;
+}
+
+#leaderBoardContainer table {
+    border-left: #234a4a solid 5px;
+}
+
+#new-game-btn {
+    background-color: #234a4a;
+    color: #e0e0e0;
+}
+
+.parallax4 {
+    background-image: url("https://i.imgur.com/sQKyaqN.jpg");
+
+    /* Create the parallax scrolling effect */
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    height: 500px;
+}
+
+#howToPlay {
+    padding: 10px;
+    background-color: rgb(18, 20, 18, 0.8)
+}
+
+#howToPlayContainer {
+    padding: 5%;
+    padding-top: 10%;
+    padding-bottom: 10%;
+}
+
+#logOutBox {
+    padding: 10px;
+    background-color: rgb(18, 20, 18, 0.8)
+}
+
+#logOutBoxContainer {
+    padding: 15%;
 }

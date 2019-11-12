@@ -9,14 +9,14 @@
 <!--THIS IS GAMES, THE JSON STUFF, NOT GAME-->
 <!--Well now its leadership stuff but still not the player fields plz-->
 
-<body class="bg-dark">
+<body>
 
-    <header id="gamesHeader" class="text-light">
+    <header id="gamesHeader" class="text-light d-flex justify-content-around">
         <h1>BATTLESHIP</h1>
         <nav>
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Leader Board</a>
+                    <a class="nav-link" href="#">Leader Board</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Games</a>
@@ -29,32 +29,13 @@
                 </li>
             </ul>
         </nav>
-        <p id="authedUserHeader"></p>
     </header>
 
-    <div class="container-fluid">
-        <div class="d-flex flex-row-reverse">
-            <button id="new-game-btn" class="btn btn-primary">Start a New Game</button>
-        </div>
-    </div>
+    <p id="authedUserHeader">Welcome mevomvas@bu.edu!</p>
 
-    <div class="container-fluid">
-        <h1 class="text-light">Games Board</h1>
-        <table id="gamesBoard" class="table table-secondary">
-            <thead>
-            <tr>
-                <th>Game Number</th>
-                <th>Started Date</th>
-                <th>Players</th> <!--both in game or one for one-->
-                <th>Winner </th> <!--Happening now, needs player, or 'p1 wins!' or 'tie'-->
-                <th></th> <!--Buttons go here 'join game'-->
-            </tr>
-            </thead>
-            <tbody id="gamesBoardGuts"></tbody>
-        </table>
-    </div>
+    <div id="spacer"></div>
 
-    <div class="container-fluid">
+    <div id="leaderBoardContainer" class="container-fluid">
         <h1 class="text-light">Leader Board</h1>
         <table id="leaderBoard" class="table table-secondary">
             <thead>
@@ -69,6 +50,51 @@
             </thead>
             <tbody id="leadershipBoardGuts"></tbody>
         </table>
+    </div>
+
+    <div class="parallax3">
+        <div id="howToPlayContainer">
+        <div id="howToPlay" class="text-light text-center">
+            <h1>How to Play</h1>
+            <p>The basic Battleship rules and instructions for playing the game are each player calls takes a shot each turn in attempt to hit one of their opponent’s ships. To “hit” one of your opponent’s ships, you must chose a letter and a number of where you think one of their ships is located. When taking a shot (or trying to hit your opponent’s ships), your 'Opponents Board' will show a yellow explosion (if a hit was made) or a blue explosion (a miss). The same color explosion will appear of your "Your Ships" board as your opponent takes their shots. This will help you keep track of your hits and misses in your hunt to find their ships.
+
+                Once all spaces on a ship have been filled with yellow explosions, your ship is sunk. Sunk ships for you and your opponent will appear in the 'Stats' sidebar. The Battleship rules on successfully sinking a ship are as follows: Carrier – 5 hits, Battleship – 3 hits, Cruiser – 3 hits, Destroyer – 2 hits.
+            </p>
+        </div>
+        </div>
+    </div>
+
+    <div id="gamesBoardContainer">
+        <div class="container-fluid">
+            <div class="d-flex flex-row-reverse">
+                <button id="new-game-btn" class="btn">Start a New Game</button>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <h1 class="text-light">Games Board</h1>
+            <table id="gamesBoard" class="table table-secondary">
+                <thead>
+                <tr>
+                    <th>Game Number</th>
+                    <th>Started Date</th>
+                    <th>Players</th> <!--both in game or one for one-->
+                    <th>Winner </th> <!--Happening now, needs player, or 'p1 wins!' or 'tie'-->
+                    <th></th> <!--Buttons go here 'join game'-->
+                </tr>
+                </thead>
+                <tbody id="gamesBoardGuts"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="parallax4">
+        <div id="logOutBoxContainer" class="text-light text-center">
+            <div id="logOutBox">
+                <h1>Log Out</h1>
+                <p>Log out</p>
+            </div>
+        </div>
     </div>
 
     <!--    Jquery-->
