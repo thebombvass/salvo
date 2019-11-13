@@ -6,11 +6,36 @@
 
 /*All Documents*/
 body {
+    background-color: #121412;
     width: 100%;
 }
 
+td {
+    text-align: center;
+}
+
+th {
+    text-align: center;
+}
 
 /*First Pic Splash Page*/
+
+#navBarSplash {
+    white-space: nowrap;
+    overflow: hidden;
+    z-index: 1;
+    position: sticky;
+    top: 200px;
+    left: 0;
+    color: #e0e0e0;
+    width: 10%;
+    background-color: rgb(18, 20, 18, 0.85)
+}
+
+#navBarSplash a {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
 
 .parallax1 {
     background-image: url("https://i.imgur.com/Ztjez01.jpg");
@@ -69,8 +94,8 @@ body {
 
 #gameDescriptionContainer {
     background-color: #121412;
-    padding: 10%;
-    padding-top: 200px;
+    padding: 15%;
+    padding-top: 100px;
     padding-bottom: 200px;
 }
 
@@ -136,6 +161,14 @@ playNow h3 {
     display: flex;
 }
 
+#failedLogInMessage{
+    color: red;
+}
+
+#failedRegisterMessage{
+    color: red;
+}
+
 /*Header Games Page*/
 #gamesHeader {
     padding-top: 10%;
@@ -169,6 +202,7 @@ playNow h3 {
     right: 10px;
 }
 
+/*Image 1 Games Page*/
 .parallax3 {
     background-image: url("https://i.imgur.com/hhyJ64D.jpg");
 
@@ -178,31 +212,52 @@ playNow h3 {
     background-repeat: no-repeat;
     background-size: cover;
 
-    height: 600px;
+    height: 700px;
 }
 
+#howToPlay {
+    font-family: monospace;
+    padding: 10px;
+    background-color: rgb(18, 20, 18, 0.85)
+}
+
+#howToPlayContainer {
+    padding: 5%;
+    padding-top: 15%;
+}
+
+#howToPlayContainer p {
+    font-size: 16px;
+}
+
+/*Leader Board Games Page*/
+#leaderBoardContainer {
+    padding-top: 25%;
+    padding-bottom: 15%;
+    padding-right: 8%;
+    padding-left: 8%;
+    background-color: #121412;
+}
+
+#leaderBoardContainer table {
+    border-left: #234a4a solid 5px;
+}
+
+/*Games Board Games Page*/
 #gamesBoardContainer {
     padding-top: 10%;
     padding-bottom: 10%;
     padding-right: 5%;
     padding-left: 5%;
-    background-color: #292b29;
-}
-
-#leaderBoardContainer {
-    padding-top: 20%;
-    padding-bottom: 10%;
-    padding-right: 5%;
-    padding-left: 5%;
-    background-color: #292b29;
+    background-color: #121412;
 }
 
 #gamesBoardContainer table {
     border-left: #234a4a solid 5px;
 }
 
-#leaderBoardContainer table {
-    border-left: #234a4a solid 5px;
+#gamesBoardContainer table a {
+    color:
 }
 
 #new-game-btn {
@@ -210,6 +265,7 @@ playNow h3 {
     color: #e0e0e0;
 }
 
+/*Image 2&Logout Games Page*/
 .parallax4 {
     background-image: url("https://i.imgur.com/sQKyaqN.jpg");
 
@@ -219,18 +275,7 @@ playNow h3 {
     background-repeat: no-repeat;
     background-size: cover;
 
-    height: 500px;
-}
-
-#howToPlay {
-    padding: 10px;
-    background-color: rgb(18, 20, 18, 0.8)
-}
-
-#howToPlayContainer {
-    padding: 5%;
-    padding-top: 10%;
-    padding-bottom: 10%;
+    height: 700px;
 }
 
 #logOutBox {

@@ -25,6 +25,8 @@ if(window.location.pathname == "/web/splash.html") {
       }
       x[slideIndex-1].style.display = "block";
     }
+
+    $(".splashTitleCaret").click(function() {location.hash = "#gameDescriptionContainer"})
 }
 
 //globally defining the variable for if someone is logged in or not
@@ -104,12 +106,12 @@ let theCurrentUser = ""
 
             let currentPlayer = game.currentPlayer.username
             if (players.includes(currentPlayer)) {
-                tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button class="btn btn-dark"><a href=${gameURL}> Go to game! </a></button></td></tr>`
+                tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button class="btn btn-dark"><a href=${gameURL} class="text-light"> Go to game! </a></button></td></tr>`
             } else {
                 if (game.gamePlayer[1]) {
                     tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td></td></tr>`
                 } else if (currentPlayer != "null") {
-                    tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button data-game=${gameNumber} class="btn btn-dark join-game-btn"> Join Game </button> </td></tr>`
+                    tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td><button data-game=${gameNumber} class="btn btn-dark join-game-btn text-light"> Join Game </button> </td></tr>`
                 } else {
                     tableGuts += `<tr><td>${gameNumber}</td><td>${date}</td><td>${players}</td><td>${status}</td><td></td></tr>`
                 }
@@ -125,18 +127,24 @@ let theCurrentUser = ""
         .done(function(data) {
         if (data[0].currentPlayer.username == "null") {
             console.log("no one is logged in right now")
-            $("#logout-form").hide()
-            $("#login-form").show()
-            $("#register-form").show()
             loadGameData()
             theCurrentUser = null
+            //ideally will redirect you back to the splash page on logout
+            if (window.location.pathname == "/web/games.html") {
+                location.href =location.protocol +"//"+location.hostname+":"+location.port+ "/web/splash.html"
+            }
         } else {
             console.log(data[0].currentPlayer.username + " is logged in")
-            $("#logout-form").show()
-            $("#login-form").hide()
-            $("#register-form").hide()
             loadGameData()
             theCurrentUser = data[0].currentPlayer.username;
+            if (window.location.pathname == "/web/games.html") {
+                $('#authedUserHeader').text(`Welcome ${theCurrentUser}!`)
+            }
+            //redirecting away from splash if you're logged in and manually go to the splas.h page.
+            //I'm not sure if this will work inside this ajax call but that's the idea
+            if (window.location.pathname == "/web/splash.html") {
+              location.href =location.protocol +"//"+location.hostname+":"+location.port+ "/web/games.html"
+            }
         }
         })
         .fail(function() {console.log("failure")})
@@ -177,13 +185,12 @@ let theCurrentUser = ""
             password: form["elements"][1].value })
         .done(function() {
             console.log("success")
-            alert("Logged in!")
             //redirect on log in
-            location.replace(window.location.href.replace(window.location.pathname, "/web/games.html"))
+            location.href =location.protocol +"//"+location.hostname+":"+location.port+ "/web/games.html"
             isAuthenticated()})
         .fail(function() {
             console.log("Failure")
-            alert("Failed to log in. Please ensure your username and password are correct. If you are new, please use the registration form to register as a new user.")});
+            $("#failedLogInMessage").text("Failed to log in. Please ensure your username and password are correct. If you are new, please use the registration form to register as a new user.")});
     }
 
     //Logging out
@@ -202,17 +209,21 @@ let theCurrentUser = ""
         var form = evt.target
 
         if(form["elements"][1].value.length < 8) {
-            alert("You were not registered correctly. Please ensure you've met the guidelines below, or that you don't already have an account.")
+           $("#failedLogInMessage").text("You were not registered correctly. Please ensure you've met the guidelines below, or that you don't already have an account.")
         } else {
             $.post("/app/players",
                 { username: form["elements"][0].value,
                 password: form["elements"][1].value })
             .done(function() {
                 console.log("success")
-                alert("User successfully registered! Please log in.")})
+                $("#failedLogInMessage").css('color', 'white')
+                $("#failedLogInMessage").text("User successfully registered! Please log in.")
+                $("#failedLogInMessage").css('color', 'white')
+                $("#failedLogInMessage").text("User successfully registered! Please log in.")
+                plusDivs(-1)})
             .fail(function(xhr, status, error) {
                 console.log("failure")
-                alert("You were not registered correctly. Please ensure you've met the guidelines below, or that you don't already have an account.")});
+                $("#failedLogInMessage").text("You were not registered correctly. Please ensure you've met the guidelines below, or that you don't already have an account.")});
             }
     }
 
@@ -222,13 +233,12 @@ let theCurrentUser = ""
                     { creator: player})
                 .done(function(data) {
                     console.log("Success")
-                    alert("Game was created!")
                     newURL = window.location.href.replace(window.location.pathname, "/web/game.html?gp=" + data)
                     $(window).attr('location', newURL)
                 })
                 .fail(function() {
                     console.log("Failure")
-                    alert("Failed to create game. Please ensure you are logged in and try again.")});
+                    alert("Something went wrong: Failed to create game. Please ensure you are logged in and try again.")});
     }
 
     //function to add a player to an open game

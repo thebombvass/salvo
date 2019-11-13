@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/web/styles.css">
 </head>
 
-<body class="bg-dark">
+<body>
 
 <div class="parallax1 text-center">
     <div id="splashTitleContainer" class="d-flex flex-column align-items-center justify-content-center">
@@ -19,6 +19,12 @@
         </div>
     </div>
 </div>
+
+<nav id="navBarSplash" class="nav flex-column">
+    <a class="nav-link text-light" href="#gameDescriptionContainer">Description</a>
+    <a class="nav-link text-light" href="#playNowContainer">Play Now</a>
+    <a class="nav-link text-light" href="#splashTitleContainer">Back to Top</a>
+</nav>
 
 <div id="gameDescriptionContainer">
     <div id="gameDescription" class="container-fluid text-center">
@@ -77,8 +83,7 @@
             <button id="playNowSlideRight" class="playNowSlideButtons">&#10094; Return to Sign In</button>
             </div>
         </div>
-
-
+        <p id="failedLogInMessage"></p>
     </div>
 </div>
 

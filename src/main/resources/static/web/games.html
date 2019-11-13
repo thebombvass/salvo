@@ -16,24 +16,22 @@
         <nav>
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Leader Board</a>
+                    <a class="nav-link" href="#leaderBoardContainer">Leader Board</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Games</a>
+                    <a class="nav-link" href="#howToPlayContainer">How to Play</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">How to Play</a>
+                    <a class="nav-link" href="#gamesBoardContainer">Games</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Sign Out</a>
+                    <a class="nav-link" href="#logOutBoxContainer">Sign Out</a>
                 </li>
             </ul>
         </nav>
     </header>
 
-    <p id="authedUserHeader">Welcome mevomvas@bu.edu!</p>
-
-    <div id="spacer"></div>
+    <p id="authedUserHeader">Welcome!</p>
 
     <div id="leaderBoardContainer" class="container-fluid">
         <h1 class="text-light">Leader Board</h1>
@@ -55,11 +53,10 @@
     <div class="parallax3">
         <div id="howToPlayContainer">
         <div id="howToPlay" class="text-light text-center">
-            <h1>How to Play</h1>
-            <p>The basic Battleship rules and instructions for playing the game are each player calls takes a shot each turn in attempt to hit one of their opponent’s ships. To “hit” one of your opponent’s ships, you must chose a letter and a number of where you think one of their ships is located. When taking a shot (or trying to hit your opponent’s ships), your 'Opponents Board' will show a yellow explosion (if a hit was made) or a blue explosion (a miss). The same color explosion will appear of your "Your Ships" board as your opponent takes their shots. This will help you keep track of your hits and misses in your hunt to find their ships.
-
-                Once all spaces on a ship have been filled with yellow explosions, your ship is sunk. Sunk ships for you and your opponent will appear in the 'Stats' sidebar. The Battleship rules on successfully sinking a ship are as follows: Carrier – 5 hits, Battleship – 3 hits, Cruiser – 3 hits, Destroyer – 2 hits.
-            </p>
+            <h1>HOW TO PLAY</h1>
+            <p>The basic Battleship rules and instructions for playing the game are each player calls takes a shot each turn in attempt to hit one of their opponent’s ships.</p>
+            <p>To “hit” one of your opponent’s ships, you must chose a letter and a number of where you think one of their ships is located. When taking a shot (or trying to hit your opponent’s ships), your 'Opponents Board' will show a yellow explosion (if a hit was made) or a blue explosion (a miss). The same color explosion will appear of your "Your Ships" board as your opponent takes their shots. This will help you keep track of your hits and misses in your hunt to find their ships.</p>
+            <p>Once all spaces on a ship have been filled with yellow explosions, your ship is sunk. Sunk ships for you and your opponent will appear in the 'Stats' sidebar. The Battleship rules on successfully sinking a ship are as follows: Carrier – 5 hits, Battleship – 3 hits, Cruiser – 3 hits, Destroyer – 2 hits.</p>
         </div>
         </div>
     </div>
@@ -91,8 +88,12 @@
     <div class="parallax4">
         <div id="logOutBoxContainer" class="text-light text-center">
             <div id="logOutBox">
-                <h1>Log Out</h1>
-                <p>Log out</p>
+                <h1>SIGN OUT</h1>
+                <p>Click the button below to sign out.</p>
+                <br>
+                <form id="logout-form" onsubmit="return false">
+                    <button type="submit" id="submit-logout-form" class="btn btn-light">Sign Out</button>
+                </form>
             </div>
         </div>
     </div>
