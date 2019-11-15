@@ -286,3 +286,58 @@ playNow h3 {
 #logOutBoxContainer {
     padding: 15%;
 }
+
+/*General Game Page*/
+#gameFieldView {
+    background-color: #121412;
+}
+
+#returnHome {
+    background-color: #234a4a;
+    margin: 20px;
+}
+
+#messageBoardContainer {
+    border-left: #234a4a solid 5px;
+    font-family: monospace;
+    background-color: #292b29;
+    padding: 3%;
+    margin: 2%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+#statsBoard {
+    margin-right: 10px;
+    height: 10%;
+    max-width: 200px;
+    padding: 2%;
+    background-color: #292b29;
+    font-family: monospace;
+}
+
+#boards {
+    width: 80%
+}
+
+.boardSlides table {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    max-width: 900px;
+}
+
+.disableTableCover {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    max-width: 900px;
+}
+
+.boardSlides {
+    width: 100%;
+}
+
+.boardSwitchBtn {
+    margin: 10px;
+}

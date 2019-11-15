@@ -2,18 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ship Locations!</title>
+    <title>Play Salvo!</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/web/styles.css">
 </head>
 <!--THIS IS GAME, THE FIELD VIEW, NOT GAMES-->
-<body class="bg-dark" id="gameFieldView">
-    <h2 class="text-center text-light">Play Battleship!</h2>
-    <p id="playersDescription" class="text-center text-light">This game is Player 1 (you) vs. Player 2</p>
+<body id="gameFieldView">
+
+    <button id="returnHome" class="btn"><a class="text-light">Return Home</a></button>
+
+    <h2 id="playersDescription" class="text-center text-light">Play Battleship</h2>
+    <p id="moreDescription" class="text-center text-light"></p>
+
+
+    <div class="container-fluid text-light">
+       <div id="messageBoardContainer">
+           <h3>MESSAGES FROM THE CAPTAIN:</h3>
+           <p id="messageBoard">
+           </p>
+       </div>
+    </div>
 
     <div class="container-fluid" id="boxShipsToBuildContainer">
-        <p class="text-light">
-            To start the game, please position your ships on the board by dragging and dropping them onto your board. If you are not happy with your placement you can remove the ship and place it again by clicking the 'remove' button. Chose if your ships are positioned vertically or horizontally by clicking the radio buttons below. Once your ships are all placed, click the 'Save' button below
-        </p>
         <div class="border border-info rounded bg-light text-center p-2">
             <div id="boxShipsToBuild">
                 <div class="row">
@@ -45,31 +55,46 @@
         </div>
     </div>
 
+<!--    <div class="container-fluid">-->
+        <div id="playSection" class="text-light d-flex justify-content-between">
+            <div id="statsBoard" class="align-self-center">
+                <h4>GAME STATS</h4>
+                <p id="date">Date: </p>
+                <p id="round">Round: </p>
+                <p id="yss">Your ships sunk: </p>
+                <p id="oss">Opponents ships sunk: </p>
+            </div>
+            <div id="boards" class="d-flex justify-content-center">
+            <div class="boardSlides">
+                <p class="text-center text-light">Your Ships</p>
+                <p id="yourBoardDisable" class="disableTableCover text-center">disabled</p>
+                <table id="yourBoard" class="table table-bordered table-hover table-primary text-center">
+                    <!-- The battleship table should be injected here via jquery -->
+                </table>
+                <div class="d-flex justify-content-end">
+                    <button id="boardSlidesRight" class="btn btn-light boardSwitchBtn"> Opponent's Board &#10095;</button>
+                </div>
+            </div>
+
+            <div class="boardSlides">
+                <p class="text-center text-light">Your Opponents Ships (Your Shots)</p>
+                <p id="opponentBoardDisable" class="disableTableCover text-center">disabled</p>
+                <table id="opponentBoard" class="table table-bordered table-primary text-center">
+                    <!-- The battleship table should be injected here via jquery -->
+                </table>
+                <div class="d-flex justify-content-end">
+                    <button id="boardSlidesLeft" class="btn btn-light boardSwitchBtn">&#10094; Your Board</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
     <div id="yourTurn" class="container-fluid text-light">
-        <p>Your turn! Take your shot</p>
         <p id="yourSelection"></p>
-        <button id="sendSalvoBtn" class="btn btn-danger" disabled>Post Salvo</button>
+        <button id="sendSalvoBtn" class="btn btn-danger" disabled>Fire!</button>
     </div>
+<!--    </div>-->
 
-    <div class="container-fluid">
-    <div class="row">
-        <div class="col-lg">
-            <p class="text-center text-light">Your Ships</p>
-            <p id="yourShipsSunk" class="text-center text-light"></p>
-            <table id="yourBoard" class="table table-bordered table-hover table-primary text-center">
-                <!-- The battleship table should be injected here via jquery -->
-            </table>
-        </div>
-
-        <div class="col-lg">
-            <p class="text-center text-light">Your Shots</p>
-            <p id="theirShipsSunk" class="text-center text-light"></p>
-            <table id="opponentBoard" class="table table-bordered table-primary text-center">
-                <!-- The battleship table should be injected here via jquery -->
-            </table>
-        </div>
-    </div>
-    </div>
 
 
 

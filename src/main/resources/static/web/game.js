@@ -8,10 +8,75 @@
 //main function
 $(function() {
 
+    $("#returnHome").click(function() {location.href =location.protocol +"//"+location.hostname+":"+location.port+ "/web/games.html"})
+
+    function typeOut(text, speed) {
+       setTimeout(function() {$("#messageBoard").text(text)}, speed)
+    }
+
+    function typeWriter (message) {
+        text=""
+        for(i=0;i<message.length; i++) {
+            speed = 50 * (i+1)
+            text += message.charAt(i)
+            typeOut(text, speed)
+        }
+    }
+
+    $("#boardSlidesLeft").click(function() {plusDivs(-1)});
+    $("#boardSlidesRight").click(function() {plusDivs(+1)});
+
+    var slideIndex = 1;
+    showDivs(slideIndex);
+
+    function plusDivs(n) {
+        showDivs(slideIndex += n);
+    }
+
+    function showDivs(n) {
+        var i;
+        var x = $(".boardSlides");
+        if (n > x.length) {slideIndex = 1}
+        if (n < 1) {slideIndex = x.length} ;
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        x[slideIndex-1].style.display = "block";
+    }
+
+    function disableAndEnableBoards(board, disEn, message) {
+
+        //variables to set the id's of the p tag where the message will go and the table that will be
+        //disabled or enabled depending on 'board' parameter
+        bTextId = ""
+        bId =""
+        if (board == "1") {
+            bTextId = '#yourBoardDisable'
+            bId = '#yourBoard'
+        } else if (board == "2") {
+            bTextId = '#opponentBoardDisable'
+            bId = '#opponentBoard'
+        }
+
+        //disable the board
+        if(disEn == '0') {
+            $(bTextId).text(message);
+            $(bTextId).show();
+            $(bId).removeClass('table-primary')
+            $(bId).addClass('table-secondary')
+        //enable the board
+        } else if (disEn =='1') {
+            $(bTextId).hide();
+            $(bId).removeClass('table-secondary')
+            $(bId).addClass('table-primary')
+        }
+
+    }
 
     //*******************Global Variables ***********************//
 
     //some comment here ab what these are
+    let date
     let pageContext
     let pageQuery
     let player1 = ""
@@ -717,7 +782,7 @@ $(function() {
                         $("#opponentBoard").find("tbody tr").eq(prevRow).children().eq(prevCol+1).removeClass('bg-danger')
                         salvoRowSelected = e.target.classList[0][0]
                         salvoColSelected = e.target.classList[0][2]
-                        $("#yourSelection").text(`You have selected to strike row: ${salvoRowSelected} col: ${salvoColSelected}`)
+                        $("#yourSelection").text(`You have selected to fire at row: ${salvoRowSelected} col: ${salvoColSelected}. Click 'Fire' or select another square below.`)
                         $("#sendSalvoBtn").prop('disabled', false)
                         e.target.classList.add('bg-danger')
                     });
@@ -801,15 +866,24 @@ $(function() {
             console.log("success")
             yourShipsSunk = data[0]
             theirShipsSunk = data[1]
-            $("#yourShipsSunk").text(`${yourShipsSunk} of your ships have been sunk by ${player2}`)
-            $("#theirShipsSunk").text(`You have sunk ${theirShipsSunk} of ${player2}'s ships'`)
+                $('#date').text(`Date: ${date}`);
+                $('#round').text(`Round: ${roundNo}`);
+                $('#yss').text(`Your ships sunk: ${yourShipsSunk}`);
+                $('#oss').text(`${player2}'s ships sunk: ${theirShipsSunk}`);
             if(yourShipsSunk==4 || theirShipsSunk==4) {
+                $('#yourTurn').hide()
                 let winner;
-                console.log('GAME OVA BITCH')
+                console.log('GAME OVER')
                 if(yourShipsSunk==4) {
                     winner = "them"
+                    typeWriter(`${player2} sunk all your ships and won! You put up a good fight soldier, but unfortunately, we lost. Click 'Return Home' at the top of the page to start a new game, join a new game, or review your position on the Leader Board.`)
+                    disableAndEnableBoards(1,0, "Your Board Disabled: GAME OVER")
+                    disableAndEnableBoards(2,0, "Opponent Board Disabled: GAME OVER")
                 } else {
                     winner= "you"
+                    typeWriter(`You sunk all of ${player2}'s ships and won! Congratulations on defending our Navy soldier! Click 'Return Home' at the top of the page to start a new game, join a new game, or review your position on the Leader Board.`)
+                    disableAndEnableBoards(1,0, "Your Board Disabled: GAME OVER")
+                    disableAndEnableBoards(2,0, "Opponent Board Disabled: GAME OVER")
                 }
                 gameIsOver(pageQuery, gp_id, winner)
             }
@@ -843,11 +917,10 @@ $(function() {
             success: function(data) {
             console.log(data)
                 //dynamically add data relevant to this game
-                let date = data.date
+                date = data.date
                 player1 = data.username1;
                 let shipsPlayer1 = data.ships1;
                 let salvoesPlayer1 = data.salvoes1;
-                let player2
                 if (data.username2 == null) {
                     player2 = "[Waiting for another player to join...]"
                 } else {
@@ -855,17 +928,23 @@ $(function() {
                 }
                 //retrieve gamePlayer_id
                 getGamePlayer();
+                console.log('info you want: '+ player2+ " and "+date)
+
+                //add something here so that if you win, it stops everything else. Typewriter and clicking cells turning red
 
                 //**condition met to enter build phase**
                 if (shipsPlayer1 == "") {
                     console.log("Enter Build Phase")
                     //ability to see ships to place
                     $('#boxShipsToBuildContainer').show()
+                    typeWriter("Let's prepare for battle! Position your ships on your board by dragging and dropping them onto your board. If you are not happy with your ship placement you can remove the ship by clicking the 'remove' button and place it again. Chose if your ships are positioned vertically or horizontally by clicking the radio buttons below. Once all your ships placed, click the 'Save' button below. BEWARE- once you click 'Save' you cannot go back.")
                     //fill ships to place box with available ships
                     //this function triggers adding drag listeners
                     fillShipsToBuildBox();
                     //add drop listeners
                     dropEventHandler();
+                    disableAndEnableBoards(1,1, "")
+                    disableAndEnableBoards(2,0, "Opponent Board Disabled: you may only place ships on your board")
 
                 //**condition met to enter turns phase**
                 } else {
@@ -876,7 +955,9 @@ $(function() {
 
                     //if there is no second player
                     if (data.username2 == null) {
-
+                        disableAndEnableBoards(1,0, "Your Board Disabled: waiting for Player 2");
+                        disableAndEnableBoards(2,0, "Opponent Board Disabled: waiting for Player 2");
+                        typeWriter("We are currently waiting for another player to join your game and place their ships. Feel free to start another game or join someone else's game while you wait by clicking 'Return Home' button at the top of the screen and scrolling down to the 'Games' section.")
                     //if there is a second player
                     } else {
                         //if second player has placed his ships, you are officially in the turns phase
@@ -889,19 +970,37 @@ $(function() {
                             //Within Turns Phase, its your turn
                             if(whosTurnIsIt(salvoesPlayer1, salvoesPlayer2) == 1) {
                                 $("#yourTurn").show()
+                                disableAndEnableBoards(1,1, "");
+                                disableAndEnableBoards(2,1, "");
+                                typeWriter(`Your turn for Round ${roundNo}! Take your shot by clicking a square on your opponents board below. When you are happy with your selection click the 'Fire' button below.`)
                                 addSalvoListeners();
                                 $("#sendSalvoBtn").click(function() {postASalvo(salvoRowSelected+"-"+salvoColSelected, gp_id, roundNo)})
                             //Within Turns Phase, its not your turn. time to wait
                             } else {
+                                disableAndEnableBoards(1,0, "Your Board Disabled: waiting for Player 2");
+                                disableAndEnableBoards(2,0, "Opponent Board Disabled: waiting for Player 2");
+                                typeWriter(`It's ${player2}'s turn to take their shot for this round.`)
+                                //refreshing to check if they have taken their shot
+                                setTimeout(function() {location=""}, 60000)
                                 console.log(`Waiting for ${player2} to take his shot for this round. Refresh page to see if they have`)
                             }
                         //if second player has not placed his ships, you chill
                         } else {
+                            disableAndEnableBoards(1,0, "Your Board Disabled: waiting for Player 2");
+                            disableAndEnableBoards(2,0, "Opponent Board Disabled: waiting for Player 2");
+                            typeWriter(`${player2} has joined your game! Waiting for ${player2} to place his or her ships.`)
+                            //refreshing to check if they have placed their ships
+                            setTimeout(function() {location=""}, 60000)
                             console.log(`Waiting for ${player2} to place his ships. Refresh page to see if they have`)
                         }
                     }
                 }
-                $('#playersDescription').text(`This game started at ${date} is between ${player1} (you) and ${player2}. Round: ${roundNo}`)
+                 $('#date').text(`Date: ${date}`);
+                 $('#round').text(`Round: ${roundNo}`);
+                 $('#yss').text(`Your ships sunk: ${yourShipsSunk}`);
+                 $('#oss').text(`${player2}'s ships sunk: ${theirShipsSunk}`);
+                $('#playersDescription').text(`${player1.toUpperCase()} (YOU) v.s. ${player2.toUpperCase()} (PLAYER 2)`)
+                //theres another id for a p tag for anything you want under this header, if needed
             },
             statusCode: {
                 403: function() {
