@@ -8,6 +8,7 @@
 //main function
 $(function() {
 
+
     $("#returnHome").click(function() {location.href =location.protocol +"//"+location.hostname+":"+location.port+ "/web/games.html"})
 
     function typeOut(text, speed) {
@@ -44,6 +45,51 @@ $(function() {
         x[slideIndex-1].style.display = "block";
     }
 
+    //*******************Global Variables Declaration for State Management ***********************//
+
+    //Data from loadGameInfo() ajax call
+    let date
+    let player1 = ""
+    let player2 = ""
+    let gp_id //gameplayer ID
+    let roundNo = 0;
+
+    //used in the URL to make the ajax call in loadGameInfo()
+    let pageContext //combination of host name and port
+    let pageQuery //query, uses game id
+
+    //used when firing a salvo to un-highlight the previously selected cell
+    let salvoRowSelected;
+    let salvoColSelected;
+
+    //from the ships sunk ajax call and used in stats and to determine if the game is over or not
+    let yourShipsSunk = 0;
+    let theirShipsSunk = 0;
+
+
+    //Dummy variables used to hold the location's of ships during the 'ship build' phase before you're ready to commit them to the repo 'ships'
+    let carrierDummy = []
+    let cruiserDummy = []
+    let battleshipDummy = []
+    let destroyerDummy = []
+
+    // and object with all the Dummy ship names(key) and an array their locations(value)
+    let shipsDummy = {carrierDummy: carrierDummy, cruiserDummy: cruiserDummy, battleshipDummy: battleshipDummy, destroyerDummy: destroyerDummy}
+
+    // Only the ships that are null, i.e. available to drag, drop, and be in the placement box
+    let shipsToShow = []
+
+    // A list of locations where ships have already been placed. Essentially if shipsDummy was one long array of all the values.
+    let occupiedBoxArray = []
+
+    //whether you are in vertical placement mode or horizontal placement mode, controlled by radio button and XX function
+    let horzVertz = "H"
+
+    //this is set every time you begin a drag event and sets this to the current event target (i.e. the ship you're moving)
+    // this is set back to null on 'drop' event
+    let currentDraggedItem = null;
+
+
     function disableAndEnableBoards(board, disEn, message) {
 
         //variables to set the id's of the p tag where the message will go and the table that will be
@@ -73,216 +119,138 @@ $(function() {
 
     }
 
-    //*******************Global Variables ***********************//
-
-    //some comment here ab what these are
-    let date
-    let pageContext
-    let pageQuery
-    let player1 = ""
-    let player2 = ""
-    let gp_id
-    let roundNo = 0;
-    let salvoRowSelected;
-    let salvoColSelected;
-    let yourShipsSunk = 0;
-    let theirShipsSunk = 0;
-
-
-    //Dummy variables for the locations of each individual ship. Used to hold their location during the 'ship build'
-    // phase before you're ready to commit them to the repo 'ships'
-    let carrierDummy = []
-    let cruiserDummy = []
-    let battleshipDummy = []
-    let destroyerDummy = []
-
-    // and object with all the Dummy ship arrays and their locations
-    let shipsDummy = {carrierDummy: carrierDummy, cruiserDummy: cruiserDummy, battleshipDummy: battleshipDummy, destroyerDummy: destroyerDummy}
-
-    // Only the ships that are available to drag, drop, be in the placement box, etc. shipDummys that are null.
-    // Used in fillShipsToBuildBox() to know which ships are still available for placement
-    // Also used in addDragListeners() so that the ships which are available for placement can listen for a drag event
-    let shipsToShow = []
-
-    //only the ships that have already been placed. basically antithesis of ShipsToShow, except its a list of locations,
-    // not a list of ships. shipDummys that are not null
-    // Used in XX function
-    let occupiedBoxArray = []
-
-    //whether you are in vertical placement mode or horizontal placement mode, controlled by radio button and XX function
-    let horzVertz = "H"
-
-    //this is set every time you begin a drag event and sets this to the current event target (i.e. the ship you're moving)
-    // this is used in addDropListeners() to determine, upon drop, if the drop is legal
-    // this is set back to null on 'drop' event
-    let currentDraggedItem = null;
-
 
     //****************************Function Creation *****************************//
 
         //****functions in 'BEGIN' phase****//
 
-    //Creates the blank HTML table for your board and your opponents board
-    function createBoards() {
+    //DOES: Creates the blank HTML table for your board and your opponents board
+    //PARAMS:
+    //DEPENDENCIES:
+    //DOM MANIPULATION: #yourBoard, #opponentBoard
+    function createBlankBoards() {
+        //html for the <thead> tag
+        let tHead = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
+        //html for the cells inside one table row, excluding the label on the left
         let rowsHtml = `<td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td><td data-box0="no" data-box1="no" data-box2="no" data-box3="no"data-box4="no" data-box5="no"> </td>`
-        let tableLabel = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
-        //for loop for inside the <tbody>//
+
+        //loop for creating multiple rows using rowsHtml, with label on left//
         let innerTbody = ""
         for(i=1; i<11; i++) {
             innerTbody += ("<tr><th scope='row'>"+ i +"</th>" + rowsHtml + "</tr>")
         }
-        $('#yourBoard').html(`${tableLabel} <tbody> ${innerTbody} </tbody>`)
+        //filling the <table> tag for your board
+        $('#yourBoard').html(`${tHead} <tbody> ${innerTbody} </tbody>`)
 
+        //this does the same as above, but for the opponent board
+        tHead = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
         rowsHtml = "<td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td>"
-        tableLabel = "<thead><tr> <th scope='col'> </th> <th scope='col'>A</th></th> <th scope='col'>B</th></th> <th scope='col'>C</th></th> <th scope='col'>D</th></th> <th scope='col'>E</th></th> <th scope='col'>F</th></th> <th scope='col'>G</th></th> <th scope='col'>H</th></th> <th scope='col'>I</th></th> <th scope='col'>J</th> </tr></thead>"
         //for loop for inside the <tbody>//
         innerTbody = ""
         for(i=1; i<11; i++) {
             innerTbody += ("<tr><th scope='row'>"+ i +"</th>" + rowsHtml + "</tr>")
         }
-        $('#opponentBoard').html(`${tableLabel} <tbody> ${innerTbody} </tbody>`)
+        $('#opponentBoard').html(`${tHead} <tbody> ${innerTbody} </tbody>`)
     }
 
         //****functions in 'SHIP BUILD' phase****//
 
-    //function that appropriately fills the box of ships during the ship building phase in the beginning of the game
+    //DOES: fills the box of ships to place with appropriate ship images during ship build phase
+    //PARAMS:
+    //DEPENDENCIES: uses global variables shipsToShow, shipsDummy, occupiedBoxArray, horzVertz; calls addDragListeners()
+    //DOM MANIPULATION: #carrierPic, #removeCarrierBtn, #battleshipPic, #removeBattleshipBtn, #cruiserPic, #removeCruiserBtn, #destroyerPic, #removeDestroyerBtn, #saveBtn
     function fillShipsToBuildBox() {
-        //check which ships are available for the list of ships to show
+        //check which ships are available for the list of shipsToShow
         shipsToShow = []
         for (var key in shipsDummy) {
             if (shipsDummy[key].length == 0) {
                 shipsToShow.push(key)
             } else {
-                //this is gonna have to be fixed, needs parse maybe?
+                //ensuring if a ship in shipsDummy is not null that its locations are in the occupiedBoxArray
                 for (let i=0; i<shipsDummy[key]; i++) {
                     occupiedBoxArray.push(shipsDummy[key][i])
                 }
             }
         }
-        if (shipsToShow.includes("carrierDummy")) {
-            $('#carrierPic').html(`<img id="carrierDragItem${horzVertz}" data-ship="ca${horzVertz}" draggable="true" class="img-fluid" style="max-height:120px"  src="/carrierWhole${horzVertz}.png" alt="cruiser pic" />`)
-        } else {
-            $('#carrierPic').html(`<button id="removeCarrierBtn" class="btn btn-light">Remove Carrier</button>`);
-            $('#removeCarrierBtn').click(function() {
-                removeShip('carrier');
-            });
-        }
-        if (shipsToShow.includes("battleshipDummy")) {
-           $('#battleshipPic').html(`<img id="battleshipDragItem${horzVertz}" data-ship="ba${horzVertz}" draggable="true" class="img-fluid" style="max-height:120px" src="/battleshipWhole${horzVertz}.png" alt="battleship pic" />`)
-        } else {
-            $('#battleshipPic').html(`<button id="removeBattleshipBtn" class="btn btn-light">Remove Battleship</button>`)
-            $('#removeBattleshipBtn').click(function() {
-                removeShip('battleship');
-            });
-        }
-        if (shipsToShow.includes("cruiserDummy")) {
-            $('#cruiserPic').html(`<img id="cruiserDragItem${horzVertz}" data-ship="ba${horzVertz}" draggable="true" class="img-fluid" style="max-height:120px" src="/cruiserWhole${horzVertz}.png" alt="cruiser pic" />`)
-        } else {
-            $('#cruiserPic').html(`<button id="removeCruiserBtn" class="btn btn-light">Remove Cruiser</button>`)
-            $('#removeCruiserBtn').click(function() {
-                removeShip('cruiser');
-            });
-        }
-        if (shipsToShow.includes("destroyerDummy")) {
-           $('#destroyerPic').html(`<img id="destroyerDragItem${horzVertz}" data-ship="de${horzVertz}" draggable="true" class="img-fluid" style="max-height:120px" src="/destroyerWhole${horzVertz}.png" alt="destroyer pic" />`)
-        } else {
-            $('#destroyerPic').html(`<button id="removeDestroyerBtn" class="btn btn-light">Remove Destroyer</button>`)
-            $('#removeDestroyerBtn').click(function() {
-                removeShip('destroyer');
-            });
-        }
+
+        //setting up the box of ships to place
+        ["carrier", "battleship", "cruiser", "destroyer"].forEach(function(ship) {
+            //all the different string interpolations needed
+            let dummyVar = ship+"Dummy"
+            let shipCapitalized = ship.charAt(0).toUpperCase() + ship.slice(1);
+            let picIdSelector = "#"+ship+"Pic"
+            let imageId = ship+"DragItem"+horzVertz
+            let imageSource = "/"+ship+"Whole"+horzVertz+".png"
+            let dataShipAttr
+            let removeIdSelector = "#remove"+shipCapitalized+"Btn"
+            let removeId = "remove"+shipCapitalized+"Btn"
+            if(ship=="carrier") {
+                dataShipAttr = "ca"+horzVertz;
+            }
+            if (ship=="battleship" || ship == "cruiser") {
+                dataShipAttr = "ba"+horzVertz;
+            }
+            if (ship == "destroyer") {
+                dataShipAttr = "de"+horzVertz;
+            }
+            //if the ship is available, show the ship either vertically or horizontally depending on horzVertz
+            if (shipsToShow.includes(dummyVar)) {
+                $(picIdSelector).html(`<img id="${imageId}" data-ship="${dataShipAttr}" draggable="true" class="img-fluid" style="max-height:120px"  src="${imageSource}" alt="ship pic" />`)
+            //if the ship is not available, show a button to remove the ship from the board
+            } else {
+                $(picIdSelector).html(`<button id="${removeId}" class="btn btn-light">Remove ${shipCapitalized}</button>`);
+                $(removeIdSelector).click(function() {
+                    removeShip(ship);
+                });
+            }
+        })
         addDragListeners()
+        //if there are no ships to show, enable the ability to save ships to the repo
         if (shipsToShow.length == 0) {
-            $('#saveBtn').prop('disabled', false)
+            $('#saveShipsBtn').prop('disabled', false)
         } else {
-            $('#saveBtn').prop('disabled', true)
+            $('#saveShipsBtn').prop('disabled', true)
         }
     }
 
-    //adds Drag event listeners to the ships
+
+    //DOES: adds drag event listeners to the ship images
+    //PARAMS:
+    //DEPENDENCIES: uses global variables shipsToShow, currentDraggedItem; called by fillShipsToBuildBox() and calls addDropListeners()
+    //DOM MANIPULATION: #carrierDragItem${horzVertz}, #battleshipDragItem${horzVertz}, #cruiserDragItem${horzVertz}, #destroyerDragItem${horzVertz}
     function addDragListeners() {
-        //add dragstart and dragend listeners meaning when you drag what happens
-        if (shipsToShow.includes("carrierDummy")) {
-            let carrierId = `#carrierDragItem${horzVertz}`
-            $(carrierId).on('dragstart', function(e) {
-                console.log('dragstart')
-                setTimeout(function () {
-                    currentDraggedItem = $(carrierId);
-                    $(carrierId).hide()
-                }, 0);
-            });
-            $(carrierId).on('dragend', function(e) {
-                console.log('dragend')
-                setTimeout(function() {
-                    currentDraggedItem = null;
-                    $(carrierId).show()
-                }, 0);
-            })
-        }
+         ["carrier", "battleship", "cruiser", "destroyer"].forEach(function(ship) {
+            let shipImageId = "#"+ship+"DragItem"+horzVertz;
+            let dummyVar = ship+"Dummy"
 
-        if (shipsToShow.includes("battleshipDummy")) {
-            let battleshipId = `#battleshipDragItem${horzVertz}`
-            $(battleshipId).on('dragstart', function(e) {
-                console.log('dragstart')
-                setTimeout(function () {
-                    currentDraggedItem = $(battleshipId);
-                    $(battleshipId).hide()
-                }, 0);
-            });
+            //add dragstart and dragend listeners to ships and set currentDraggedItem
+            if (shipsToShow.includes(dummyVar)) {
+                $(shipImageId).on('dragstart', function(e) {
+                    console.log('dragstart')
+                    setTimeout(function () {
+                        currentDraggedItem = $(shipImageId);
+                        $(shipImageId).hide()
+                    }, 0);
+                });
+                $(shipImageId).on('dragend', function(e) {
+                    console.log('dragend')
+                    setTimeout(function() {
+                        currentDraggedItem = null;
+                        $(shipImageId).show()
+                    }, 0);
+                })
+            }
 
-            $(battleshipId).on('dragend', function(e) {
-                console.log('dragend')
-                setTimeout(function() {
-                    currentDraggedItem = $(battleshipId);
-                    $(battleshipId).show()
-                }, 0);
-            })
-        }
-
-        if (shipsToShow.includes("cruiserDummy")) {
-            let cruiserId = `#cruiserDragItem${horzVertz}`
-            $(cruiserId).on('dragstart', function(e) {
-                console.log('dragstart')
-                setTimeout(function () {
-                    currentDraggedItem = $(cruiserId);
-                    $(cruiserId).hide()
-                }, 0);
-            });
-
-            $(cruiserId).on('dragend', function(e) {
-                console.log('dragend')
-                setTimeout(function() {
-                    currentDraggedItem = $(cruiserId);
-                    $(cruiserId).show()
-                }, 0);
-            })
-        }
-
-        if  (shipsToShow.includes("destroyerDummy")) {
-            let destroyerId = `#destroyerDragItem${horzVertz}`
-            $(destroyerId).on('dragstart', function(e) {
-                console.log('dragstart')
-                setTimeout(function () {
-                    currentDraggedItem = $(destroyerId);
-                    $(destroyerId).hide()
-                }, 0);
-            });
-
-            $(destroyerId).on('dragend', function(e) {
-                console.log('dragend')
-                setTimeout(function() {
-                    currentDraggedItem = $(destroyerId);
-                    $(destroyerId).show()
-                }, 0);
-            })
-        }
+         })
         addDropListeners()
     }
 
-    //this doesn't actually add any event listeners. It adds data attributes to the td cells which
-    //determine which ships are allowed to be placed there. First clears all data attributes, then adds
-    //them back, so long as they don't conflict with a ship already placed.
-    //triggered by add DragListeners and upstream, fillBox
+
+    //DOES: Adds data attributes to the td cells in your board that determine which ships are allowed to be placed there
+    //      First clears all data attributes, then adds them back, so long as they don't conflict with a ship already placed. Doesn't actually add any event listeners.
+    //PARAMS:
+    //DEPENDENCIES: uses global variables occupiedBoxArray; triggered by add DragListeners() and upstream, fillShipsToBuildBox()
+    //DOM MANIPULATION: #yourBoard and all <td> cells in it
     function addDropListeners() {
         let rows = $("#yourBoard").find("tbody tr")
         let cols = $("#yourBoard").find("tbody tr").eq(0).find("td")
@@ -355,10 +323,11 @@ $(function() {
         }
     }
 
-    //this should be called only once to set up listeners that will check where data- attribue on the <td> cell matches
-    //the data attribute of the item being dragged to determine legal placement.
-    //As ships become placed and boxes become illegal for placement, the data attributes will change to handle this and will
-    // automatically not trigger this event listener since it will no longer match
+    //DOES: sets up drop event listeners on <td> cells in your board that will check the data-attributes attached by addDropListeners() and determine legal placement.
+    //      if starter cell is legal it will move onto other functions to handle what to do with a drop (i.e. place the ship in thr right boxes).
+    //PARAMS:
+    //DEPENDENCIES: uses global variables currentDraggedItem; called in loadGameInfo(); calls shipPlacementProcessor;
+    //DOM MANIPULATION: #yourBoard and all <td> cells in it
     function dropEventHandler() {
         let rows = $("#yourBoard").find("tbody tr")
         let cols = $("#yourBoard").find("tbody tr").eq(0).find("td")
@@ -372,17 +341,18 @@ $(function() {
                 $("#yourBoard").find("tbody tr").eq(i+0).children().eq(j+1).on('dragenter', function(e) {
                     e.preventDefault();
                 });
-                //add a class to each td cell which says what cell it is (used as 'starter cell' in dropToDummyProcessor upon placement)
-                let currbox = i.toString() +"-"+j.toString()
-                $("#yourBoard").find("tbody tr").eq(i+0).children().eq(j+1).addClass(currbox);
 
-                //adding on drop listener which will trigger dropToDummyProcessor() if data attributes match on <td> box and draggable item
+                //add a class to each td cell which says what cell it is (used as 'starter cell' in shipPlacementProcessor upon placement)
+                let currentTdCell = i.toString() +"-"+j.toString()
+                $("#yourBoard").find("tbody tr").eq(i+0).children().eq(j+1).addClass(currentTdCell);
+
+                //adding on drop listener which will trigger shipPlacementProcessor() if data attributes match on <td> cell and currentDraggedItem
                 $("#yourBoard").find("tbody tr").eq(i+0).children().eq(j+1).on('drop', function(e) {
                     for(let i=0; i<6; i++) {
                         let dtag = 'data-box' + i
                         if(e.target.getAttribute(dtag) == currentDraggedItem[0].dataset.ship) {
                             console.log('dropped')
-                            dropToDummyProcessor(currentDraggedItem[0].getAttribute('id'), e.target.classList[0])
+                            shipPlacementProcessor(currentDraggedItem[0].getAttribute('id'), e.target.classList[0])
                         }
                     }
                 });
@@ -390,13 +360,15 @@ $(function() {
         }
     }
 
-    //called by dropEventHandler on a drop event. converts the cell clicked and the ship being dragged
-    //into a placed ship. Uses illegalPlacementNotice and blockingCellswithShip
-    function dropToDummyProcessor(ship, starterCell) {
-    //down first then over
+    //DOES: places the ship being dragged and dropped into the correct place, if all ship locations are legal
+    //PARAMS: ship- id of the item being dragged (ship image); starterCell- data attribute on the <td> tag where the drop event listener was triggered
+    //DEPENDENCIES: uses global variables shipDummy; called by dropEventHandler() on drop event; calls illegalPlacementNotice() and blockingCellswithShip();
+    //DOM MANIPULATION:
+    function shipPlacementProcessor(ship, starterCell) {
         let shipLength
 
-        //process starter cell
+        //process starter cell into row and column
+        //note to developer - starterCell data attribute describes down first then over
         let startRow = parseInt(starterCell)
         let startCol = parseInt(starterCell.charAt(2))
 
@@ -419,12 +391,13 @@ $(function() {
                     carrierDummy.push((startRow+i).toString() + '-'+ startCol.toString())
                 }
             }
-            //check to ensure that this is a legal placement. if placement is legal...
+            //check to ensure that this is a legal placement for all locations. if placement is legal...
             if (illegalPlacementNotice(carrierDummy)) {
                 //..add the locations to occupiedBoxArray and remove data-ship from those locations//
                 blockingCellsWithShip(carrierDummy)
                 //place the images of the ship in the appropriate cells
                 createShip(carrierDummy, 'carrier', horzVertz)
+                //update the box of available ships to reflect recent ship placement. This triggers addDropListeners() so that occupied cells can no longer trigger a drop event
                 fillShipsToBuildBox();
             } else {
                 i= 0
@@ -515,7 +488,10 @@ $(function() {
         }
     }
 
-    //function that ensures the ship placement in not the starter cell is not conflicting with another ship
+    //DOES: Ensures each <td> cell in the ship placement is not conflicting with another ship (not just starterCell)
+    //PARAMS: dummyArray - array of locations the ship will potentially take up
+    //DEPENDENCIES: uses global variable occupiedBoxArray; called inside shipPlacementProcessor(); returns true if placement is legal, false if placement is illegal;
+    //DOM MANIPULATION:
     function illegalPlacementNotice(dummyArray) {
         for (i=0;i<dummyArray.length;i++) {
             if(occupiedBoxArray.includes(dummyArray[i])) {
@@ -526,7 +502,10 @@ $(function() {
         } return true
     }
 
-    //remove data attributes from td cells that contain full ship
+    //DOES: remove data attributes from td cells that contain a placed ship so that you cannot place ships there
+    //PARAMS: dummyArray - array of locations the ship will potentially take up
+    //DEPENDENCIES: uses global variable occupiedBoxArray; called inside shipPlacementProcessor();
+    //DOM MANIPULATION: #yourBoard and <td> cells inside
     function blockingCellsWithShip(dummyArray) {
         for (i=0;i<dummyArray.length; i++) {
             //..add the locations to occupiedBoxArray..
@@ -541,104 +520,54 @@ $(function() {
         }
     }
 
-    //removes the image that is the ship from td cells where the ship was
+    //DOES: removes the ship images from the <td> cells where the ship was
+    //PARAMS: ship - string with the name of the ship to be removed
+    //DEPENDENCIES: uses global variable shipsDummy, occupiedBoxArray; triggered by a 'Remove' button; calls addDropListenersBack() and fillShipsToBuildBox()
+    //DOM MANIPULATION: #yourBoard and <td> cells in it;
     function removeShip(ship) {
-        //for carrier
+        let dummyVar
         if (ship == 'carrier') {
-            //for each location that the carrier occupies...
-            for (i=0; i<carrierDummy.length;i++) {
-                row = parseInt(carrierDummy[i][0])
-                col = parseInt(carrierDummy[i][2])
-                //..clear the cells of the image of the ship..
-                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': 'none'});
-                //..remove the ship's location from the occupiedBoxArray..
-                if(occupiedBoxArray.includes(carrierDummy[i])) {
-                    let index = occupiedBoxArray.indexOf(carrierDummy[i]);
-                    occupiedBoxArray.splice(index, 1)
-                }
-                //..return data-ship of the cells back to normal..
-                addDropListenersBack(carrierDummy[i])
-            }
-            //set carrier back to none so that it can be...
-            let placeholder = carrierDummy.length
-            for (i=0;i<placeholder;i++) {
-                carrierDummy.pop()
-            }
-            //..refilled in the box to be placed again
-            fillShipsToBuildBox()
-
-        //for battleship
+            dummyVar = carrierDummy;
         } else if (ship == 'battleship') {
-            for (i=0; i<battleshipDummy.length;i++) {
-                row = parseInt(battleshipDummy[i][0])
-                col = parseInt(battleshipDummy[i][2])
-                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': 'none'});
-                if(occupiedBoxArray.includes(battleshipDummy[i])) {
-                    let index = occupiedBoxArray.indexOf(battleshipDummy[i]);
-                    occupiedBoxArray.splice(index, 1)
-                }
-                //..return data-ship of the cells back to normal..
-                addDropListenersBack(battleshipDummy[i])
-            }
-            //set carrier back to none so that it can be...
-            let placeholder = battleshipDummy.length
-            for (i=0;i<placeholder;i++) {
-                battleshipDummy.pop()
-            }
-            //..refilled in the box to be placed again
-            fillShipsToBuildBox()
-
-        //for cruiser
+            dummyVar = battleshipDummy;
         } else if (ship == 'cruiser') {
-            for (i=0; i<cruiserDummy.length;i++) {
-                row = parseInt(cruiserDummy[i][0])
-                col = parseInt(cruiserDummy[i][2])
-                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': 'none'});
-                if(occupiedBoxArray.includes(cruiserDummy[i])) {
-                    let index = occupiedBoxArray.indexOf(cruiserDummy[i]);
-                    occupiedBoxArray.splice(index, 1)
-                }
-                //..return data-ship of the cells back to normal..
-                addDropListenersBack(cruiserDummy[i])
-            }
-            //set carrier back to none so that it can be...
-            let placeholder = cruiserDummy.length
-            for (i=0;i<placeholder;i++) {
-                cruiserDummy.pop()
-            }
-            //..refilled in the box to be placed again
-            fillShipsToBuildBox()
-
-        //for destroyer
+            dummyVar = cruiserDummy;
         } else {
-            for (i=0; i<destroyerDummy.length;i++) {
-                row = parseInt(destroyerDummy[i][0])
-                col = parseInt(destroyerDummy[i][2])
-                $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': 'none'});
-                if(occupiedBoxArray.includes(destroyerDummy[i])) {
-                    let index = occupiedBoxArray.indexOf(destroyerDummy[i]);
-                    occupiedBoxArray.splice(index, 1)
-                }
-                //..return data-ship of the cells back to normal..
-                addDropListenersBack(destroyerDummy[i])
-            }
-            //set carrier back to none so that it can be...
-            let placeholder = destroyerDummy.length
-            for (i=0;i<placeholder;i++) {
-                destroyerDummy.pop()
-            }
-
-            //..refilled in the box to be placed again
-            fillShipsToBuildBox()
-
+            dummyVar = destroyerDummy;
         }
+
+        //for each location that the ship occupies...
+        for (i=0; i<dummyVar.length;i++) {
+            row = parseInt(dummyVar[i][0])
+            col = parseInt(dummyVar[i][2])
+            //..clear the cells of the image of the ship..
+            $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': 'none'});
+            //..remove the ship's location from the occupiedBoxArray..
+            if(occupiedBoxArray.includes(dummyVar[i])) {
+                let index = occupiedBoxArray.indexOf(dummyVar[i]);
+                occupiedBoxArray.splice(index, 1)
+            }
+            //..return data-ship of the cells back to normal..
+            addDropListenersBack(dummyVar[i])
+        }
+
+        //set dummy variable of the ship back to none so that it can be...
+        let placeholder = dummyVar.length
+        for (i=0;i<placeholder;i++) {
+            dummyVar.pop()
+        }
+        //..refilled in the box to be placed again
+        fillShipsToBuildBox()
     }
 
-    //adds the data attributes back to cells where a ship used to be that was removed
+    //DOES: adds the data attributes used for drop listeners back to cells where a ship used to be that was removed
+    //PARAMS: loc - String, location with row and column of a cell where a ship is
+    //DEPENDENCIES: called within removeShip();
+    //DOM MANIPULATION: #yourBoard and <td> cells in it
     function addDropListenersBack(loc) {
         row = parseInt(loc[0])
         col = parseInt(loc[2])
-        //array of boxes that can have this type of listener
+        //array of boxes that can have this type of listener for legal placement
         let caV = ["0-0", "0-1", "0-2", "0-3", "0-4", "0-5", "0-6", "0-7", "0-8", "0-9", "1-0", "1-1", "1-2", "1-3", "1-4", "1-5", "1-6", "1-7", "1-8", "1-9", "2-0", "2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8", "2-9", "3-0", "3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7", "3-8", "3-9", "4-0", "4-1", "4-2", "4-3", "4-4", "4-5", "4-6", "4-7", "4-8", "4-9", "5-0", "5-1", "5-2", "5-3", "5-4", "5-5", "5-6", "5-7", "5-8", "5-9"]
         let caH = ["0-0", "0-1", "0-2", "0-3", "0-4", "0-5", "1-0", "1-1", "1-2", "1-3", "1-4", "1-5", "2-0", "2-1", "2-2", "2-3", "2-4", "2-5", "3-0", "3-1", "3-2", "3-3", "3-4", "3-5", "4-0", "4-1", "4-2", "4-3", "4-4", "4-5", "5-0", "5-1", "5-2", "5-3", "5-4", "5-5", "6-0", "6-1", "6-2", "6-3", "6-4", "6-5", "7-0", "7-1", "7-2", "7-3", "7-4", "7-5", "8-0", "8-1", "8-2", "8-3", "8-4", "8-5", "9-0", "9-1", "9-2", "9-3", "9-4", "9-5"]
         let baV = ["0-0", "0-1", "0-2", "0-3", "0-4", "0-5", "0-6", "0-7", "0-8", "0-9", "1-0", "1-1", "1-2", "1-3", "1-4", "1-5", "1-6", "1-7", "1-8", "1-9", "2-0", "2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8", "2-9", "3-0", "3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7", "3-8", "3-9", "4-0", "4-1", "4-2", "4-3", "4-4", "4-5", "4-6", "4-7", "4-8", "4-9", "5-0", "5-1", "5-2", "5-3", "5-4", "5-5", "5-6", "5-7", "5-8", "5-9", "6-0", "6-1", "6-2", "6-3", "6-4", "6-5", "6-6", "6-7", "6-8", "6-9", "7-0", "7-1", "7-2", "7-3", "7-4", "7-5", "7-6", "7-7", "7-8", "7-9"]
@@ -668,9 +597,12 @@ $(function() {
 
         //****functions in 'TURNS' phase****//
 
-
-    //creates a ship
+    //DOES: places images of a ship into the correct cells to 'create a ship' on yourBoard
+    //PARAMS: dummyArray- array of locations(string) to place the ship in; ship- string, name of the ship being created; horzVertz - string, "H" fo horizontal or "V" for vertical
+    //DEPENDENCIES: uses global variables shipsDummy; called in setUpGrid() (which is called by loadGameInfo upstream) and shipPlacementProcessor();
+    //DOM MANIPULATION: #yourBoard and <td> cells in it
     function createShip(dummyArray, ship, horzVertz) {
+        //these types of ship images face a different way, so the array needs to be in a dif order
         if(horzVertz == 'V') {
             if(ship == 'carrier' || ship == 'battleship') {
                 if(dummyArray[0][0] < dummyArray[1][0]) {
@@ -678,27 +610,32 @@ $(function() {
                 }
             }
         }
-        //fill in ship tail - this belongs in starter-cell since their backwards
+        //fill in ship tail - this belongs in starter-cell since they're backwards
         let row = parseInt(dummyArray[0][0])
         let col = parseInt(dummyArray[0][2])
-        let purl = "/"+ship+"Tail"+horzVertz+".png"
-        $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${purl})`, "background-size": "cover"});
+        let imageUrl = "/"+ship+"Tail"+horzVertz+".png"
+        $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${imageUrl})`, "background-size": "cover"});
+
         //fill in ship head
         row = parseInt(dummyArray[dummyArray.length-1][0])
         col = parseInt(dummyArray[dummyArray.length-1][2])
-        purl = "/"+ship+"Head"+horzVertz+".png"
-        $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${purl})`, "background-size": "cover"});
+        imageUrl = "/"+ship+"Head"+horzVertz+".png"
+        $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${imageUrl})`, "background-size": "cover"});
+
         //fill in ship middle
         for(i=1;i<dummyArray.length-1; i++) {
             row = parseInt(dummyArray[i][0])
             col = parseInt(dummyArray[i][2])
-            purl = "/"+ship+"Middle"+horzVertz+".png"
-            $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${purl})`, "background-size": "cover"});
+            imageUrl = "/"+ship+"Middle"+horzVertz+".png"
+            $("#yourBoard").find("tbody tr").eq(row).children().eq(col+1).css({'background-image': `url(${imageUrl})`, "background-size": "cover"});
         }
     }
 
-    //adds a bomb image to specific cells on the players' board based on 'hitMiss', which is set in the db during a turn
-    //used later on in setUpGrid
+
+    //DOES: adds a bomb image to specific cells on the your board based on 'hitMiss', which is set in the salvo repo during a turn
+    //PARAMS: Srow - string, row for the salvo location; Scol- string, column for the salvo location; hitMiss- string, "H" for hit and "M" for miss; board- int, 1 for #yourBoard, 2 for #opponentBoard
+    //DEPENDENCIES: called by setUpGrid() (which is called by loadGameInfo upstream)
+    //DOM MANIPULATION: #yourBoard and #opponentBoard and <td> cells inside each of them
     function createSalvo(Srow, Scol, hitMiss, board) {
         let row = parseInt(Srow)
         let col = parseInt(Scol)
@@ -719,17 +656,15 @@ $(function() {
         }
     }
 
-    //setting up initial ships and salvoes. Accepts following parameters:
-    //  'array'-array- to collect the locations on the grid using parseColumns()
-    //  'shipSalvo'-string- to determine if we are creating ships on the board or salvoes. feeds into createShip() or createSalvo()
-    //  'board'-int- to determine if these will be set up on your board or your opponents board
-    //called inside the ajax call to create the entire 2 boards with ships and slavoes that are already present
-    //this should only be called during the 'turns' mode
+    //DOES: Sets up ships and salvoes that are already in the database on the appropriate board
+    //PARAMS: array - array of either ship data or salvo data to get string locs from; shipSalvo - string "ship" for ship and "salvo" for salvo; board- int, 1 for #yourBoard, 2 for #opponentBoard
+    //DEPENDENCIES: called by loadGameInfo() ajax call, only during turns mode; calls createShip() or createSalvo();
+    //DOM MANIPULATION:
     function setUpGrid(array, shipSalvo, board) {
         let initialLocations = []
         if (shipSalvo == "ship") {
             for (let i=0; i < array.length; i++) {
-                arr = array[i]
+                let arr = array[i]
                 if(arr.locations[0][0] !== arr.locations[1][0]) {
                     createShip(array[i].locations, array[i].shipType, "V")
                 } else {
@@ -751,6 +686,10 @@ $(function() {
         }
     }
 
+    //DOES: determines if you're allowed to take a shot or not during the turns round
+    //PARAMS: salvoesPlayer1 - array from ajax data; salvoesPlayer2 - array from ajax data
+    //DEPENDENCIES: called inside loadGameInfo(); returns 0 if you cannot take a shot and 1 if you can take a shot
+    //DOM MANIPULATION:
     function whosTurnIsIt(salvoesPlayer1, salvoesPlayer2) {
         if (salvoesPlayer1.length > salvoesPlayer2.length) {
             console.log('returning zero')
@@ -761,16 +700,22 @@ $(function() {
         }
     }
 
+    //DOES: adds listeners for a click event  to #opponentBoard <td> cells when it is your turn so that you can select the cell you want your shot to go in
+    //PARAMS:
+    //DEPENDENCIES: uses global variables salvoRowSelected and salvoColSelected; called in loadGameInfo();
+    //DOM MANIPULATION: #opponentBoard and <td> cells inside it; enables #sendSalvoBtn; fills #yourSelection with the row and column number currently selected
     function addSalvoListeners() {
-        let rows = $("#yourBoard").find("tbody tr")
-        let cols = $("#yourBoard").find("tbody tr").eq(0).find("td")
+        let rows = $("#opponentBoard").find("tbody tr")
+        let cols = $("#opponentBoard").find("tbody tr").eq(0).find("td")
 
+        //first gives all cells a class specifying the location of that cell
         for (var i=0; i<rows.length; i++) {
             for (var j=0; j <cols.length; j++) {
                 $("#opponentBoard").find("tbody tr").eq(i+0).children().eq(j+1).addClass(i+'-'+j)
             }
         }
 
+        //then adds listeners to highlight cells as they are selected, unhighlight cells as new ones are selected, and print the currently selected cell's row and column at the top
         for (var i=0; i<rows.length; i++) {
             for (var j=0; j <cols.length; j++) {
                 let box = $("#opponentBoard").find("tbody tr").eq(i+0).children().eq(j+1)
@@ -786,15 +731,17 @@ $(function() {
                         $("#sendSalvoBtn").prop('disabled', false)
                         e.target.classList.add('bg-danger')
                     });
-                } else {
                 }
-
             }
         }
     }
 
     //****AJAX CALLs AND PHASE LOGIC*****
 
+    //DOES:
+    //PARAMS:
+    //DEPENDENCIES:
+    //DOM MANIPULATION:
 
     //ajax post of ship data upon ship placement
     function postAShip(shipList) {
@@ -1025,7 +972,7 @@ $(function() {
     $('#saveBtn').click(function() {postAShip(shipsDummy)})
 
     //display your boards on the page
-    createBoards();
+    createBlankBoards();
 
     //initially getting data for the game. Within this ajax call there is logic to understand what mode of the
     //game you are in, i.e. building ships, waiting for the other player to move, your turn, etc.

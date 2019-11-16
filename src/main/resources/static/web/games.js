@@ -42,34 +42,40 @@ let theCurrentUser = ""
     //evaluates the scores, number of games played, and number of wins, loses, and ties per player and fills
     //in the leader board. Uses data from players class from ajax
     function fillInLeaderBoard(array) {
-        let tableGuts = ""
+        //creating an object to store exactly the data we need
+        let newArray = []
         array.forEach((element) => {
-            let username = element.username;
-            let scoreTotal = 0.0
+            let newObject = {}
+            newObject.username = element.username;
+            newObject.scoreTotal = 0.0
+            newObject.wins = 0.0;
+            newObject.ties = 0.0;
+            newObject.losses = 0.0;
             element.gamePlayer.forEach((gp) => {
                 if (gp.score) {
-                    scoreTotal += gp.score.score
+                    newObject.scoreTotal += gp.score.score
+                    if (gp.score.score==1.0){
+                        newObject.wins += 1;
+                    } else if (gp.score.score==0.5){
+                        newObject.ties += 1;
+                    } else {
+                        newObject.losses += 1;
+                    }
                 }
             })
-            let wins = 0;
-            let ties = 0;
-            let losses = 0;
-            if (element.gamePlayer.score) {
-                element.gamePlayer.forEach((gp) => {
-                    if (gp.score.score==1.0){
-                        wins += 1;
-                    } else if (gp.score.score==0.5){
-                        ties += 1;
-                    } else {
-                        losses += 1;
-                    }
-                })
-            }
 
-            let gameQuantity = element.gamePlayer.length
-
-            tableGuts += `<tr><td>${username}</td><td>${scoreTotal}</td><td>${wins}</td><td>${ties}</td><td>${losses}</td><td>${gameQuantity}</td></tr>`
+            newObject.gameQuantity = element.gamePlayer.length
+            newArray.push(newObject);
         })
+
+        //sort leaderboard by best scoreTotal
+        newArray.sort((a,b) => (a.scoreTotal > b.scoreTotal) ? 1 : ((b.scoreTotal> a.scoreTotal) ? -1 : 0));
+
+        //create filler for board with sorted array
+        let tableGuts = ""
+        for (i=0;i<newArray.length; i++) {
+            tableGuts += `<tr><td>${newArray[i].username}</td><td>${newArray[i].scoreTotal}</td><td>${newArray[i].wins}</td><td>${newArray[i].ties}</td><td>${newArray[i].losses}</td><td>${newArray[i].gameQuantity}</td></tr>`
+        }
 
         $("#leadershipBoardGuts").html(tableGuts);
     }
