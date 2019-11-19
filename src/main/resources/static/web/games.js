@@ -69,7 +69,7 @@ let theCurrentUser = ""
         })
 
         //sort leaderboard by best scoreTotal
-        newArray.sort((a,b) => (a.scoreTotal > b.scoreTotal) ? 1 : ((b.scoreTotal> a.scoreTotal) ? -1 : 0));
+        newArray.sort((a,b) => (a.scoreTotal < b.scoreTotal) ? 1 : ((b.scoreTotal< a.scoreTotal) ? -1 : 0));
 
         //create filler for board with sorted array
         let tableGuts = ""

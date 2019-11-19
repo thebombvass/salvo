@@ -341,3 +341,12 @@ playNow h3 {
 .boardSwitchBtn {
     margin: 10px;
 }
+
+#yourTurn {
+    margin-bottom: 10px;
+    width: 80%;
+}
+
+#yourTurn p {
+    margin: 10px;
+}

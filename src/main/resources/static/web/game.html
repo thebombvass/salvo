@@ -78,21 +78,21 @@
 
             <div class="boardSlides">
                 <p class="text-center text-light">Your Opponents Ships (Your Shots)</p>
+                <div id="yourTurn" class="container-fluid text-light d-flex justify-content-end">
+                    <p id="yourSelection"></p>
+                    <button id="sendSalvoBtn" class="btn btn-danger" disabled>Fire!</button>
+                </div>
                 <p id="opponentBoardDisable" class="disableTableCover text-center">disabled</p>
                 <table id="opponentBoard" class="table table-bordered table-primary text-center">
                     <!-- The battleship table should be injected here via jquery -->
                 </table>
-                <div class="d-flex justify-content-end">
+                <div class="d-flex justify-content-start">
                     <button id="boardSlidesLeft" class="btn btn-light boardSwitchBtn">&#10094; Your Board</button>
                 </div>
             </div>
             </div>
         </div>
 
-    <div id="yourTurn" class="container-fluid text-light">
-        <p id="yourSelection"></p>
-        <button id="sendSalvoBtn" class="btn btn-danger" disabled>Fire!</button>
-    </div>
 <!--    </div>-->
 
 
